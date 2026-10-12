@@ -19,3 +19,4 @@
 | [0003](0003-interactive-report-design.md) | interactive-report 스킬 설계 | 2026-10-12 | 채택 |
 | [0004](0004-distribution-plugin-and-claudeai.md) | 배포: 로컬 plugin marketplace, cloud 는 claude.ai 업로드 | 2026-10-12 | 채택 |
 | [0005](0005-parameter-widgets.md) | 파라미터 위젯 (조건 변경 → 재계산 → 시각화) | 2026-10-12 | 채택 |
+| [0006](0006-local-full-artifact-reduced.md) | 로컬 전체판 + Artifact 축소판 | 2026-10-12 | 채택 |

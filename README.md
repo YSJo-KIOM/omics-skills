@@ -55,4 +55,6 @@ python3 plugins/omics-skills/skills/$S/scripts/build_report.py plugins/omics-ski
 node tests/browser_check.mjs "file://$O/analysis.html#deg" analysis
 ```
 
+큰 데이터 확인: 15만 행 합성 TSV 로 `--both` 빌드 후 로컬 전체판이 열리고 축소판이 15 MB 이하인지 본다 (runtime 은 행 배열에 spread·apply 금지).
+
 새 스킬을 넣을 때: 원본 데이터·환자 정보·키를 넣지 않는다. 예시는 합성 데이터나 공개 데이터로. 하드코딩 경로는 인자·설정으로 뺀다.

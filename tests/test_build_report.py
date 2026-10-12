@@ -62,6 +62,36 @@ assert 'window.IR_WIDGETS["w"]=function(ctx){' in page and "<\\/script>" in page
 if br.shutil.which("node"):
     raises(lambda: br.build(wspec({"type": "widget", "id": "w", "controls": ctl, "script": "const = ;"})), "문법 오류")
 
+# local = full data, Artifact = top results (explicit tables.<id>.artifact, then automatic size budget)
+assert br.test_expr("<0.05", 0.01) and not br.test_expr("<0.05", 0.2) and br.test_expr("abs>=1", -2) and br.test_expr(">0 <5", 3)
+assert not br.test_expr(">1", None) and br.test_expr("infl", "Inflammation")
+big = [{"g": f"G{i:05d}", "lfc": ((i * 37) % 200 - 100) / 25, "p": ((i * 7919) % 10007) / 10007, "txt": "x" * 60} for i in range(3000)]
+bspec = lambda art=None, extra=(): {"meta": {"title": "t"}, "tables": {"d": {"rows": big, "sort": "p", **({"artifact": art} if art else {})}},
+                                     "tabs": [{"title": "요약", "blocks": [{"type": "table", "table": "d"}, *extra]}]}
+full = data_of(br.build(bspec({"top": 100, "where": {"lfc": "abs>=1"}, "columns": ["lfc", "p"]})))["tables"]["d"]
+assert len(full["rows"]) == 3000 and "trim" not in full and len(full["columns"]) == 4, "local build keeps everything"
+art = data_of(br.build(bspec({"top": 100, "where": {"lfc": "abs>=1"}, "columns": ["lfc", "p"]}), artifact=True, full_report="/x/full.html"))
+D = art["tables"]["d"]
+assert len(D["rows"]) == 100 and D["total"] == 3000 and all(abs(r["lfc"]) >= 1 for r in D["rows"])
+assert [c["key"] for c in D["columns"]] == ["g", "lfc", "p"], "key column is always kept"
+assert [r["p"] for r in D["rows"]] == sorted(r["p"] for r in D["rows"]) and "원본 3,000행" in D["trim"]
+info = art["tabs"][-1]["blocks"][-1]
+assert info["title"] == "Artifact 판" and ["전체 보고서 (로컬)", "/x/full.html"] in info["rows"]
+raises(lambda: br.build(bspec({"columns": ["p"]}, [{"type": "chart", "table": "d", "kind": "histogram", "x": "lfc"}]), artifact=True), "lfc")
+page = br.build(bspec(), artifact=True, max_mb=0.15)
+D = data_of(page)["tables"]["d"]
+assert len(page.encode()) <= 0.15 * 1024 * 1024 and 50 <= len(D["rows"]) < 3000 and any("자동 축소" in w for w in br.WARN), br.WARN
+assert [r["p"] for r in D["rows"]] == sorted(r["p"] for r in big)[:len(D["rows"])], "auto cut keeps the top rows by the table sort"
+with tempfile.TemporaryDirectory() as tmp:
+    sp = pathlib.Path(tmp) / "s.json"
+    sp.write_text(json.dumps(bspec({"top": 10})), encoding="utf-8")
+    assert br.main([str(sp), "--both"]) == 0
+    assert (pathlib.Path(tmp) / "s.html").exists() and "전체 보고서 (로컬)" in (pathlib.Path(tmp) / "s_artifact.html").read_text()
+
+# runtime must survive 100k+ row tables: no argument spreading over row arrays (call-stack overflow, found with 150k rows)
+rt = (SKILL / "assets/report.html").read_text()
+assert "apply(null" not in rt and not re.search(r"Math\.(min|max)\(\.\.\.", rt), "use loops for min/max over rows"
+
 # both examples build; artifact mode has no document wrapper; plotly only when charts exist
 for ex in ("analysis", "literature", "explainer"):
     sp = SKILL / "examples" / ex / "spec.json"

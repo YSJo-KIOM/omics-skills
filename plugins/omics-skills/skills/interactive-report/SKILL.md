@@ -9,8 +9,10 @@ description: Build a single-file interactive HTML report from analysis results o
 `scripts/build_report.py` 가 데이터·그림을 묶어 파일 하나로 만든다. 외부 의존은 Plotly CDN(그래프가 있을 때만)뿐이다.
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json                 # -> report/spec.html
-python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json -o report/x_artifact.html --artifact
+# 로컬 세션: 원본 전체판 + Artifact 축소판을 함께
+python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json --both      # -> spec.html, spec_artifact.html
+# cloud 세션 (claude.ai/code): Artifact 판만
+python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json --artifact  # -> spec_artifact.html
 ```
 
 `CLAUDE_SKILL_DIR` 는 이 SKILL.md 가 있는 폴더다. 빌더는 Python 표준 라이브러리만 쓴다 (YAML spec 만 PyYAML 필요).
@@ -31,11 +33,14 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json -o report
    - 그림: PNG 150–200 dpi 또는 SVG. 그림 하나 3 MB 이하.
 4. **spec.json 을 보고서 폴더에 작성**한다 (데이터와 같은 폴더 — 경로는 spec 기준 상대경로). 스키마: [references/spec.md](references/spec.md). 시작점은 [examples/](examples/) 를 복사.
    R 에서는 `jsonlite::write_json(spec, "spec.json", auto_unbox = TRUE, pretty = TRUE)` 로 써도 된다.
-5. **빌드하고 경고를 모두 해결**한다. 오류 메시지는 어떤 탭·블록·열이 문제인지 알려 준다.
+5. **빌드하고 경고를 모두 해결**한다 (로컬 `--both`, cloud `--artifact`). 오류 메시지는 어떤 탭·블록·열이 문제인지 알려 준다.
+   "자동 축소" 경고가 나오면 그 표에 `artifact.top`·`sort` 를 정해 의도한 상위 결과가 남게 한다.
 6. **확인** (그래프·위젯을 넣었으면 필수):
    `google-chrome --headless=new --no-sandbox --virtual-time-budget=8000 --window-size=1400,1300 --screenshot=shot.png "file://$PWD/report/spec.html#<탭id>"` 후 스크린샷을 본다.
-7. **전달**: 로컬 HTML 경로를 알려 준다. 공유·열람용 링크가 필요하면 `--artifact` 로 만든 파일을 Artifact 도구로 게시하고
-   `capabilities: {"downloads": true}` 를 함께 준다 (TSV·Markdown **저장** 버튼이 이 기능을 쓴다. 없어도 **복사**는 된다).
+7. **전달**:
+   - 로컬 세션: **로컬 전체판** 경로(원본 데이터 전체, 크기 제한 없음)와, `_artifact.html` 을 Artifact 도구로 게시한 링크(상위 결과 축소판)를 함께 알려 준다.
+   - cloud 세션: 사용자가 로컬 파일을 열 수 없으므로 Artifact 링크만 준다.
+   - 표나 review 가 있으면 게시할 때 `capabilities: {"downloads": true}` 를 준다 (TSV·Markdown **저장** 버튼. 없어도 **복사**는 된다).
 
 ## 탭 설계 규칙
 
@@ -90,6 +95,29 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json -o report
   선택지에 설명(`d`)·근거(`r`)·권고(`rec`)·주의(`warn`)를 단다. **Markdown 생성** → 복사·저장. 바구니 내용을 표로 덧붙일 수 있다.
   선택은 브라우저에 자동 저장된다. 위젯이 있으면 각 위젯의 현재 조건과 결과(`## 탐색 조건`)도 함께 넣는다.
 - 사용자가 이 Markdown 이나 TSV 를 다시 붙여 넣으면 그것을 다음 단계(검증 대상, 추가 분석, 명세 확정)의 입력으로 쓴다.
+
+## 로컬 전체판과 Artifact 축소판
+
+| | 로컬 전체판 (`spec.html`) | Artifact 축소판 (`spec_artifact.html`) |
+|---|---|---|
+| 데이터 | 원본 전체 (16 MB 를 넘어도 됨, 150 MB 넘으면 경고) | 표마다 `artifact` 기준의 상위 결과, 15 MB 이하 보장 |
+| 보는 곳 | 이 PC 브라우저 | claude.ai 링크 (cloud 세션은 이것만) |
+| 저장 버튼 | 브라우저 다운로드 | `downloads` capability |
+
+큰 표에는 Artifact 에 남길 상위 결과를 직접 정한다:
+
+```json
+"tables": {"deg": {"source": "deg_all.tsv", "sort": "padj",
+                   "artifact": {"top": 3000, "where": {"padj": "<0.1"}, "columns": ["gene", "log2FC", "padj", "direction"]}}}
+```
+
+- `top` 상위 N행 · `sort` 순서 (기본: 표의 `sort`, `"-score"` 는 내림차순) · `where` `{열: 조건}` (`<0.05`, `abs>=1`) · `columns` 남길 열 (key 열은 자동 포함).
+  |값| 순서가 필요하면 절댓값 열을 TSV 에 미리 만들어 둔다.
+- 지정하지 않았는데 15 MB 를 넘으면 가장 큰 표부터 정렬 기준 상위 행만 남기도록 **자동 축소**하고 경고한다. 정렬 기준이 없으면 앞쪽 행이 남으니 `sort` 를 꼭 둔다.
+- 축소된 표에는 "원본 N행 중 …" 안내가, 그 표로 계산하는 위젯에는 "축소판으로 계산" 경고가 붙고, 환경 탭에 축소 내역과 로컬 전체판 경로가 들어간다.
+- 요약 카드·핵심 숫자는 원본 기준으로 계산해 spec 에 넣으므로 두 판에서 같다. 위젯이 표 전체를 세는 계산(DEG 수 등)이면 축소판 값이 달라지므로,
+  그 표는 축소하지 않거나(`where` 로 계산에 필요한 행을 모두 남기기) 그런 집계는 Python/R 에서 미리 계산해 카드로 넣는다.
+- 그림은 줄지 않는다. 큰 그림은 Artifact 에도 그대로 들어가니 해상도를 조절한다.
 
 ## 그래프 — 시각적 탐색
 
@@ -151,7 +179,7 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json -o report
 ## 지킬 것
 
 - 환자 실명·식별 번호, API 키·토큰을 표·그림·spec 에 넣지 않는다. Artifact 는 비공개로 시작하지만 공유될 수 있다.
-- 결과는 16 MB 이하 (Artifact 한도). 넘으면 필요한 열만, 유의 행만, 상위 N 으로 줄인다.
+- Artifact 판은 15 MB 이하 (빌더가 보장). 로컬 전체판에는 크기 제한이 없지만, 쓰지 않는 열은 빼서 브라우저가 가볍게 열리게 한다.
 - 외부 이미지 URL 은 Artifact 에서 차단된다 — 파일로 받아 `src` 에 경로로 넣는다.
 - spec.json·데이터를 보고서 옆에 두고, 재생성 명령을 `environment.reproduce` 에 적는다.
 - 숫자 결론(카드·핵심 결과)은 표 데이터에서 계산해 넣는다. 손으로 옮겨 적지 않는다.

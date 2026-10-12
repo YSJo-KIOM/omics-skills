@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tempfile
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 HERE = pathlib.Path(__file__).resolve().parent
 TEMPLATE = HERE.parent / "assets" / "report.html"
 PLOTLY = '<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>'
@@ -33,7 +33,8 @@ TONES = {"up", "down", "good", "warn", "acc", "mut"}
 CHART_KINDS = {"scatter", "bar", "histogram", "box"}
 FIELD_TYPES = {"choice", "multi", "text", "textarea", "number"}
 CONTROL_TYPES = {"range", "select", "toggle"}
-MAX_BYTES = 16 * 1024 * 1024
+ARTIFACT_MB = 15.0          # claude.ai Artifact page limit is 16 MB; keep a margin
+LOCAL_WARN_MB = 150         # a local file has no limit, but very large pages open slowly
 
 
 class SpecError(Exception):
@@ -170,7 +171,7 @@ def _is_missing(v):
     return v is None or (isinstance(v, float) and not math.isfinite(v)) or (isinstance(v, str) and v.strip().lower() in NA)
 
 
-def prepare_table(tid, t, base, cat_max):
+def prepare_table(tid, t, base, cat_max, artifact=False):
     if "source" in t:
         p = (base / t["source"]).resolve()
         if not p.exists():
@@ -250,7 +251,73 @@ def prepare_table(tid, t, base, cat_max):
         sort = {"key": sort.lstrip("-"), "desc": sort.startswith("-")}
     if sort and sort["key"] not in keys:
         raise SpecError(f"표 '{tid}': sort 열 '{sort['key']}' 이 없습니다")
-    return {"id": tid, "title": t.get("title", tid), "key": key, "columns": specs, "rows": out, "sort": sort}
+    D = {"id": tid, "title": t.get("title", tid), "key": key, "columns": specs, "rows": out, "sort": sort}
+    cfg = t.get("artifact")
+    if cfg is not None:
+        cfg = _artifact_cfg(tid, cfg, keys)
+        if artifact:
+            D = shrink_table(D, cfg)
+    return D
+
+
+def _artifact_cfg(tid, cfg, keys):
+    """tables.<id>.artifact = {top, sort, where, columns}: how the Artifact copy keeps the top results."""
+    if not isinstance(cfg, dict) or set(cfg) - {"top", "sort", "where", "columns"}:
+        raise SpecError(f"표 '{tid}': artifact 는 top / sort / where / columns 를 가진 객체입니다")
+    cfg = dict(cfg)
+    if "top" in cfg and not (isinstance(cfg["top"], int) and cfg["top"] > 0):
+        raise SpecError(f"표 '{tid}': artifact.top 은 양의 정수")
+    if isinstance(cfg.get("sort"), str):
+        cfg["sort"] = {"key": cfg["sort"].lstrip("-"), "desc": cfg["sort"].startswith("-")}
+    for k in ([cfg["sort"]["key"]] if cfg.get("sort") else []) + list(cfg.get("where") or {}) + list(cfg.get("columns") or []):
+        if k not in keys:
+            raise SpecError(f"표 '{tid}': artifact 에 쓴 열 '{k}' 이 없습니다")
+    return cfg
+
+
+def test_expr(expr, v):
+    """Same grammar as the page's numeric filter: '<0.05', '>=1', 'abs>=1', '>0 <5'; otherwise substring match."""
+    parts = [x for x in re.split(r"\s+|&+", str(expr).strip()) if x]
+    ms = [re.fullmatch(r"(abs|\|x\|)?\s*(>=|<=|>|<|==|=|!=)\s*(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)", x, re.I) for x in parts]
+    if parts and all(ms):
+        if not isinstance(v, (int, float)) or isinstance(v, bool):
+            return False
+        ops = {">": float.__gt__, "<": float.__lt__, ">=": float.__ge__, "<=": float.__le__, "!=": float.__ne__, "=": float.__eq__, "==": float.__eq__}
+        return all(ops[m.group(2)](float(abs(v) if m.group(1) else v), float(m.group(3))) for m in ms)
+    return str(expr).strip().lower() in ("" if v is None else str(v)).lower()
+
+
+def sorted_rows(rows, sort):
+    if not sort:
+        return list(rows)
+    k = sort["key"]
+    have = [r for r in rows if r.get(k) is not None]
+    have.sort(key=lambda r: (0, r[k], "") if isinstance(r[k], (int, float)) else (1, 0, str(r[k])), reverse=bool(sort.get("desc")))
+    return have + [r for r in rows if r.get(k) is None]
+
+
+def _sort_text(sort):
+    return f"{sort['key']} {'내림차순' if sort.get('desc') else '오름차순'} 상위 " if sort else "앞쪽 "
+
+
+def shrink_table(D, cfg):
+    total, rows = len(D["rows"]), D["rows"]
+    for col, expr in (cfg.get("where") or {}).items():
+        rows = [r for r in rows if test_expr(expr, r.get(col))]
+    sort = cfg.get("sort") or D.get("sort")
+    rows = sorted_rows(rows, sort)
+    if cfg.get("top"):
+        rows = rows[:cfg["top"]]
+    cols = D["columns"]
+    if cfg.get("columns"):
+        keep = set(cfg["columns"]) | {D["key"]}
+        cols = [c for c in cols if c["key"] in keep]
+        rows = [{c["key"]: r[c["key"]] for c in cols} for r in rows]
+    if len(rows) == total and len(cols) == len(D["columns"]):
+        return D
+    how = " · ".join([f"{c} {e}" for c, e in (cfg.get("where") or {}).items()] + ([f"{_sort_text(sort)}{len(rows):,}행"] if len(rows) < total else []))
+    return {**D, "columns": cols, "rows": rows, "total": total, "how": how or "열 일부만", "asort": sort,
+            "trim": f"Artifact 판: 원본 {total:,}행 중 {how or '전체'}만 들어 있습니다" + (f" (열 {len(cols)}/{len(D['columns'])}개)" if len(cols) < len(D["columns"]) else "") + ". 전체 결과는 로컬 보고서에서 보세요."}
 
 
 # ---------------------------------------------------------------- blocks
@@ -278,11 +345,11 @@ def embed_image(src, base):
 
 
 class Ctx:
-    def __init__(self, spec, base):
-        self.spec, self.base, self.tables, self.n_inline, self.widgets = spec, base, {}, 0, {}
+    def __init__(self, spec, base, artifact=False):
+        self.spec, self.base, self.tables, self.n_inline, self.widgets, self.artifact = spec, base, {}, 0, {}, artifact
         self.cat_max = int(spec.get("cat_max", 12))
         for tid, t in (spec.get("tables") or {}).items():
-            self.tables[_sid(tid)] = prepare_table(_sid(tid), t, base, self.cat_max)
+            self.tables[_sid(tid)] = prepare_table(_sid(tid), t, base, self.cat_max, artifact)
 
     def table_ref(self, b, where):
         if isinstance(b.get("table"), str):
@@ -295,7 +362,7 @@ class Ctx:
             tid = _sid(b.get("id") or f"table{self.n_inline}")
             if tid in self.tables:
                 raise SpecError(f"{where}: 표 id '{tid}' 가 중복됩니다")
-            self.tables[tid] = prepare_table(tid, b, self.base, self.cat_max)
+            self.tables[tid] = prepare_table(tid, b, self.base, self.cat_max, self.artifact)
             return tid
         raise SpecError(f"{where}: table(표 id) 또는 source/rows 가 필요합니다")
 
@@ -515,8 +582,10 @@ def env_blocks(spec, spec_name, ctx):
     return bl
 
 
-def build(spec, base=".", spec_name="(dict)", artifact=False):
-    """spec dict -> HTML string. Raises SpecError on invalid input; warnings collect in WARN."""
+def build(spec, base=".", spec_name="(dict)", artifact=False, max_mb=ARTIFACT_MB, full_report=None):
+    """spec dict -> HTML string. Raises SpecError on invalid input; warnings collect in WARN.
+    artifact=True: body-only page for the Artifact tool; tables follow tables.<id>.artifact and, if the page is still
+    over max_mb, the largest tables are cut to their top rows automatically (with a warning)."""
     WARN.clear()
     base = pathlib.Path(base)
     meta = dict(spec.get("meta") or {})
@@ -526,7 +595,7 @@ def build(spec, base=".", spec_name="(dict)", artifact=False):
     tabs_in = spec.get("tabs") or []
     if not tabs_in:
         raise SpecError("tabs 가 비어 있습니다")
-    ctx = Ctx(spec, base)
+    ctx = Ctx(spec, base, artifact)
     tabs, ids = [], set()
     for k, t in enumerate(tabs_in):
         tid = _sid(t.get("id") or f"tab{k + 1}")
@@ -548,29 +617,62 @@ def build(spec, base=".", spec_name="(dict)", artifact=False):
     last = tabs[-1]
     if last["role"] == "environment" or re.search(r"환경|environment|methods?|방법", last["title"], re.I):
         last["blocks"] += env
+        env_tab = last
     else:
-        tabs.append({"id": "env" if "env" not in ids else "env-info", "title": "분석 환경·기타", "role": "environment", "blocks": env})
+        env_tab = {"id": "env" if "env" not in ids else "env-info", "title": "분석 환경·기타", "role": "environment", "blocks": env}
+        tabs.append(env_tab)
     if len(tabs) > 10:
         WARN.append(f"탭이 {len(tabs)}개 — 8개 이하로 묶는 것을 권장합니다")
     kinds = {b["type"] for t in tabs for b in _walk(t["blocks"])}
-    has_chart = bool(kinds & {"chart", "widget"})
-    data = {"meta": meta, "tabs": tabs, "tables": ctx.tables, "has_widgets": "widget" in kinds,
-            "build": datetime.datetime.now().strftime("%Y%m%d%H%M%S")}
-    payload = json.dumps(data, ensure_ascii=False, allow_nan=False, separators=(",", ":")).replace("</", "<\\/")
     head, body = TEMPLATE.read_text(encoding="utf-8").split("<!--IR-BODY-->")
-    head = head.replace("%%TITLE%%", html.escape(meta["title"])).replace("%%PLOTLY%%", PLOTLY if has_chart else "")
-    body = body.replace("%%DATA%%", payload).replace("%%WIDGETS%%", widget_js(ctx.widgets))
+    head = head.replace("%%TITLE%%", html.escape(meta["title"])).replace("%%PLOTLY%%", PLOTLY if kinds & {"chart", "widget"} else "")
+    body = body.replace("%%WIDGETS%%", widget_js(ctx.widgets))
+    stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    def assemble():
+        data = {"meta": meta, "tabs": tabs, "tables": ctx.tables, "has_widgets": "widget" in kinds, "build": stamp}
+        payload = json.dumps(data, ensure_ascii=False, allow_nan=False, separators=(",", ":")).replace("</", "<\\/")
+        return head + body.replace("%%DATA%%", payload)
+
+    page = assemble()
     if artifact:
-        page = head + body
+        limit = max_mb * 1024 * 1024
+        for _ in range(30):                      # cut the largest table toward the budget until the page fits
+            size = len(page.encode())
+            if size <= limit:
+                break
+            sizes = {tid: len(json.dumps(D["rows"], ensure_ascii=False, separators=(",", ":")).encode()) for tid, D in ctx.tables.items()}
+            if not sizes or max(len(D["rows"]) for D in ctx.tables.values()) <= 50:
+                raise SpecError(f"Artifact 판이 {size / 1e6:.1f} MB 로 한도({max_mb:g} MB)를 넘습니다. 표를 줄여도 안 되므로 그림 해상도·개수를 줄이세요")
+            tid = max(sizes, key=sizes.get)
+            D, nb = ctx.tables[tid], sizes[tid]
+            keep = max(50, int(len(D["rows"]) * max(0.05, (nb - (size - limit) * 1.05) / nb)))
+            if keep >= len(D["rows"]):
+                keep = len(D["rows"]) // 2
+            total = D.get("total", len(D["rows"]))
+            srt = D.get("asort") or D.get("sort")
+            rows = sorted_rows(D["rows"], srt)[:keep]
+            how = (D.get("how", "") + " · " if D.get("how") and "상위" not in D.get("how", "") else "") + f"{_sort_text(srt)}{keep:,}행 (용량 자동 축소)"
+            ctx.tables[tid] = {**D, "rows": rows, "total": total, "how": how,
+                               "asort": srt, "trim": f"Artifact 판: 원본 {total:,}행 중 {how}만 들어 있습니다. 전체 결과는 로컬 보고서에서 보세요."}
+            WARN.append(f"Artifact 용량 한도로 표 '{tid}' 를 {total:,} → {keep:,}행으로 자동 축소했습니다"
+                        + ("" if srt else " (정렬 기준이 없어 앞쪽 행 유지)") + f" — spec 에 tables.{tid}.artifact.top 을 정하면 직접 고를 수 있습니다")
+            page = assemble()
+        cut = [D for D in ctx.tables.values() if D.get("trim")]
+        if cut or full_report:
+            env_tab["blocks"].append({"type": "kv", "title": "Artifact 판", "code": False, "rows":
+                [[D["title"], f"원본 {D['total']:,}행 → {len(D['rows']):,}행 ({D['how']})"] for D in cut]
+                + ([["전체 보고서 (로컬)", full_report]] if full_report else [])})
+            page = assemble()
+        if len(page.encode()) > limit:
+            raise SpecError(f"Artifact 판이 {len(page.encode()) / 1e6:.1f} MB 로 한도({max_mb:g} MB)를 넘습니다")
     else:
         page = ('<!doctype html>\n<html lang="ko"><head><meta charset="utf-8">'
                 '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-                + head + "</head><body>\n" + body + "</body></html>\n")
-    size = len(page.encode())
-    if size > MAX_BYTES:
-        WARN.append(f"결과가 {size / 1e6:.1f} MB — Artifact 한도(16MB)를 넘습니다. 표의 열·행을 줄이거나(상위 N, 유의 행만) 그림 해상도를 낮추세요")
+                + page.replace(head, head + "</head><body>\n", 1) + "</body></html>\n")
+        if len(page.encode()) > LOCAL_WARN_MB * 1024 * 1024:
+            WARN.append(f"로컬 보고서가 {len(page.encode()) / 1e6:.0f} MB — 브라우저에서 열 때 느릴 수 있습니다. 쓰지 않는 열을 빼세요")
     return page
-
 
 def _walk(blocks):
     for b in blocks:
@@ -596,22 +698,27 @@ def load_spec(path):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="spec(JSON/YAML) -> 단일 파일 interactive HTML 보고서")
     ap.add_argument("spec")
-    ap.add_argument("-o", "--out", help="출력 경로 (기본: spec 과 같은 이름의 .html)")
-    ap.add_argument("--artifact", action="store_true", help="claude.ai Artifact 게시용 (doctype/head/body 없이 본문만)")
+    ap.add_argument("-o", "--out", help="출력 경로 (기본: spec 과 같은 이름의 .html, --artifact 면 _artifact.html)")
+    ap.add_argument("--artifact", action="store_true", help="Artifact 게시용만: 본문만, 표는 tables.<id>.artifact 기준으로 축소, 한도 이하")
+    ap.add_argument("--both", action="store_true", help="로컬 전체판(<이름>.html) + Artifact 축소판(<이름>_artifact.html) 함께")
+    ap.add_argument("--max-mb", type=float, default=ARTIFACT_MB, help=f"Artifact 판 크기 상한 MB (기본 {ARTIFACT_MB:g})")
     a = ap.parse_args(argv)
     sp = pathlib.Path(a.spec)
+    full_out = pathlib.Path(a.out) if a.out and not a.artifact else sp.with_suffix(".html")
+    art_out = pathlib.Path(a.out) if a.out and a.artifact else full_out.with_name(full_out.stem + "_artifact.html")
+    jobs = ([(full_out, False)] if not a.artifact else []) + ([(art_out, True)] if a.artifact or a.both else [])
     try:
-        page = build(load_spec(sp), sp.parent, sp.name, a.artifact)
+        spec = load_spec(sp)
+        for out, art in jobs:
+            page = build(spec, sp.parent, sp.name, art, a.max_mb, str(full_out.resolve()) if art and a.both else None)
+            out.write_text(page, encoding="utf-8")
+            print(f"작성: {out} ({len(page.encode()) / 1024:,.0f} KB, {'Artifact 축소판 — 게시용' if art else '로컬 전체판'})")
+            for w in WARN:
+                print(f"경고: {w}")
     except SpecError as e:
         print(f"오류: {e}", file=sys.stderr)
         return 1
-    out = pathlib.Path(a.out) if a.out else sp.with_suffix(".html")
-    out.write_text(page, encoding="utf-8")
-    print(f"작성: {out} ({len(page.encode()) / 1024:,.0f} KB{', artifact 본문' if a.artifact else ''})")
-    for w in WARN:
-        print(f"경고: {w}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -26,6 +26,13 @@ COPD–근감소 Biomarker Atlas, EPICv2 명세 작성기 (아티팩트). 요구
   설명 문구는 실제 계산으로 검증해 고침: 깊이 1 은 η=1 이어도 과적합이 느림, 깊이 3·η=1 은 m=2 에서 검증 최저 후 상승.
 - 표가 없는 보고서는 선택 바구니를 숨김.
 
+## 추가: 로컬 전체판 / Artifact 축소판 (v0.3, [[decisions/0006]])
+- `--both` → `spec.html` (원본 전체) + `spec_artifact.html` (상위 결과 ≤15 MB). `tables.<id>.artifact` 로 기준 지정, 없으면 자동 축소.
+- 15만 행 합성 표: 로컬 22 MB 1.5초 렌더, 필터·WebGL 산점도 정상 / 축소판 15 MB 로 자동 축소 (102,557행, padj 상위라 유의 행 모두 보존).
+- 버그 수정: 10만+ 행에서 슬라이더 범위 계산 `Math.min.apply` call stack 초과 → 루프로. 회귀 검사 추가.
+- 검사: 빌더 ok, 브라우저 44 PASS (analysis 28 · literature 5 · explainer 6 · trimmed 5).
+- 사용자가 claude.ai 에 zip 을 올려 `anthropic-skills:interactive-report` 로 동기화됨 (v0.2). v0.3 zip 재업로드 필요.
+
 ## 배포 상태
 - GitHub: YSJo-KIOM/omics-skills (private) push 완료. `gh auth setup-git` 으로 git 자격증명 연결.
 - 로컬: `claude plugin marketplace add YSJo-KIOM/omics-skills` + `claude plugin install omics-skills@omics-skills` (user scope) 완료.

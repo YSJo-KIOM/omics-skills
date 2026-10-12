@@ -136,6 +136,8 @@ figcaption{font-size:12px;color:var(--mut);margin-top:4px}
 .wg-main .cards{margin:0}
 .wg-plot{width:100%}
 .wg-note{font-size:13px}
+.trimnote{font-size:11.5px;color:var(--warn);background:var(--warnbg);padding:4px 10px;border-bottom:1px solid var(--line)}
+.wg-trim{font-size:11px;color:var(--warn);background:var(--warnbg);padding:5px 8px;border-radius:4px;line-height:1.45}
 .wg-err{color:var(--warn);font-size:12px;font-family:var(--f-mono);white-space:pre-wrap;background:var(--warnbg);padding:6px 9px;border-radius:4px}
 @media (max-width:760px){.wg{grid-template-columns:minmax(0,1fr)}}
 /* review */
@@ -359,6 +361,7 @@ function makeTable(host, b) {
     '<span class="cnt"></span><button class="btn" type="button" data-a="reset">필터 초기화</button>' +
     '<button class="btn" type="button" data-a="add" title="필터를 통과한 모든 행을 선택 바구니에 담습니다">보이는 행 담기</button>' +
     '<button class="btn" type="button" data-a="copy">TSV 복사</button><button class="btn" type="button" data-a="save">TSV 저장</button></div>' +
+    (D.trim ? '<div class="trimnote">' + esc(D.trim) + "</div>" : "") +
     '<div class="tw" style="max-height:' + (b.height || 620) + 'px"><table class="tbl" id="' + uid + '"><thead><tr class="hrow">';
   cols.forEach((c, i) => { h += '<th tabindex="0" data-i="' + i + '" title="' + esc(c.tip || c.key) + '"' + (c.width ? ' style="min-width:' + (+c.width) + 'px"' : "") + ">" + esc(c.label || c.key) + (c.tip ? '<span class="q" aria-hidden="true">?</span>' : "") + "</th>"; });
   h += '</tr><tr class="frow">';
@@ -368,8 +371,9 @@ function makeTable(host, b) {
       const vals = Array.from(new Set(D.rows.flatMap(r => tokens(r[c.key], c.sep)))).sort((x, y) => cmpVals(x, y));
       h += '<th><select class="cs" data-i="' + i + '" aria-label="' + esc(c.label || c.key) + ' 선택"><option value="">전체</option>' + vals.map(v => '<option value="' + esc(v) + '">' + esc(v) + "</option>").join("") + "</select></th>";
     } else if (c.type === "num") {
-      const vs = D.rows.map(r => r[c.key]).filter(isNum);
-      let lo = vs.length ? Math.min.apply(null, vs) : 0, hi = vs.length ? Math.max.apply(null, vs) : 1;
+      let lo = Infinity, hi = -Infinity;   // loop on purpose: spreading 100k+ row values into min/max overflows the call stack
+      for (const r of D.rows) { const v = r[c.key]; if (isNum(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } }
+      if (lo > hi) { lo = 0; hi = 1; }
       if (c.range) { lo = Math.max(lo, c.range[0]); hi = Math.min(hi, c.range[1]); }
       T.rng[i] = [lo, hi]; const st = (hi - lo) / 200 || 1;
       h += '<th><input class="cf" type="text" data-i="' + i + '" placeholder="≥, <, abs>=" aria-label="' + esc(c.label || c.key) + ' 조건 (예: >=1, <0.05, abs>=1)">' +
@@ -464,7 +468,7 @@ function render(T, n) {
     h += "</tr>";
   }
   T.tbl.tBodies[0].innerHTML = h; T.shown = n;
-  T.cnt.textContent = n.toLocaleString() + "행 표시 · 필터 결과 " + T.view.length.toLocaleString() + " / 전체 " + D.rows.length.toLocaleString();
+  T.cnt.textContent = n.toLocaleString() + "행 표시 · 필터 결과 " + T.view.length.toLocaleString() + " / 전체 " + D.rows.length.toLocaleString() + (D.total > D.rows.length ? " (원본 " + D.total.toLocaleString() + "행 중)" : "");
   $(".more", T.blk).hidden = n >= T.view.length;
 }
 
@@ -599,7 +603,9 @@ function makeWidget(host, b) {
       c.options.map(o => '<option value="' + esc(o.v) + '"' + (o.v === v[c.id] ? " selected" : "") + ">" + esc(o.l == null ? o.v : o.l) + "</option>").join("") + "</select>" + help(c) + "</div>";
     return '<div class="wg-ctl"><label class="chk" for="' + id + '"><input type="checkbox" id="' + id + '" data-c="' + esc(c.id) + '"' + (v[c.id] ? " checked" : "") + "> " + lab + "</label>" + help(c) + "</div>";
   };
+  const cut = b.table && R.tables[b.table].trim ? R.tables[b.table] : null;
   host.insertAdjacentHTML("beforeend", '<div class="wg" id="' + uid + '"><div class="wg-side">' + b.controls.map(ctlHTML).join("") +
+    (cut ? '<small class="wg-trim">이 Artifact 판은 원본 ' + cut.total.toLocaleString() + "행 중 " + cut.rows.length.toLocaleString() + "행으로 계산합니다. 개수·비율은 로컬 전체 보고서와 다를 수 있습니다.</small>" : "") +
     '<div class="wg-acts"><button class="btn" type="button" data-a="reset">기본값</button><button class="btn" type="button" data-a="md" title="현재 조건과 결과를 Markdown 으로 복사">조건 복사</button>' +
     (b.table ? '<button class="btn pri" type="button" data-a="take" hidden>조건에 맞는 행 담기</button>' : "") + "</div></div>" +
     '<div class="wg-main"><div class="wg-cards"></div><div class="wg-plots"></div><div class="wg-custom"></div><div class="wg-note prose"></div><div class="wg-err" role="alert" hidden></div></div></div>');

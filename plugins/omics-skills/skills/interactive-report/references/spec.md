@@ -1,4 +1,4 @@
-# spec 스키마 (build_report.py v0.2)
+# spec 스키마 (build_report.py v0.3)
 
 spec 은 JSON(또는 YAML) 객체 하나다. 상대경로는 spec 파일 위치 기준.
 
@@ -37,8 +37,18 @@ spec 은 JSON(또는 YAML) 객체 하나다. 상대경로는 spec 파일 위치 
 | `columns` | 보일 열과 순서. 문자열 또는 열 객체. 생략하면 모든 열 |
 | `labels` | `{열: 표시 이름}` 간단 지정 |
 | `sort` | 기본 정렬. `"padj"` (오름차순), `"-score"` (내림차순), 또는 `{"key":..,"desc":true}` |
+| `artifact` | Artifact 판에 남길 상위 결과 `{top, sort, where, columns}` (아래). 로컬 전체판에는 영향 없음 |
 
 결측으로 보는 값: 빈칸, `NA`, `NaN`, `null`, `None`, `N/A`, `#N/A`, 무한대.
+
+### artifact (Artifact 축소판 기준)
+
+```json
+"artifact": {"top": 3000, "sort": "padj", "where": {"padj": "<0.1", "log2FC": "abs>=0.5"}, "columns": ["gene", "log2FC", "padj"]}
+```
+순서: `where` 로 거른 뒤 → `sort` (기본은 표의 sort) 로 정렬 → 위에서 `top` 행 → `columns` 만 남김 (key 열은 항상 포함).
+조건 문법은 표의 숫자 필터와 같다 (`<0.05`, `>=1`, `abs>=1`, `>0 <5`, 숫자가 아니면 포함 검색).
+`--artifact`/`--both` 빌드에서만 적용된다. 그래도 크기 상한을 넘으면 가장 큰 표부터 정렬 순 상위로 자동 축소한다.
 
 ### 열 객체
 
@@ -223,7 +233,12 @@ details 안의 그래프는 펼칠 때 그린다.
 
 ## 출력
 
-- 기본: `<!doctype html>` 완결 파일. 브라우저에서 바로 연다. TSV·MD 저장은 브라우저 다운로드.
-- `--artifact`: doctype/head/body 없는 본문 (Artifact 도구가 감싼다). 게시할 때 `capabilities: {"downloads": true}`.
-  Artifact 저장 허용 확장자에 `.tsv` 가 없어서 TSV 는 `.txt` (탭 구분) 로 저장된다.
-- 16 MB 를 넘으면 경고. Plotly 는 cdnjs 2.35.3 을 chart·widget 이 있을 때만 불러온다.
+| 명령 | 결과 |
+|---|---|
+| `build_report.py spec.json` | 로컬 전체판 `spec.html` (`-o` 로 경로 지정). 원본 전체, 크기 제한 없음 (150 MB 넘으면 경고) |
+| `--artifact` | Artifact 축소판만 `spec_artifact.html` (`-o` 로 지정). 본문만 (Artifact 도구가 감쌈), 표는 `artifact` 기준 축소, `--max-mb` (기본 15) 이하 보장 |
+| `--both` | 둘 다. 축소판 환경 탭에 로컬 전체판 절대경로가 들어감 |
+
+- 게시할 때 `capabilities: {"downloads": true}`. Artifact 저장 허용 확장자에 `.tsv` 가 없어서 TSV 는 `.txt` (탭 구분) 로 저장된다.
+- 축소된 표: 도구 막대 아래 안내, 행 수 옆 "(원본 N행 중)", 그 표를 쓰는 위젯에 경고, 환경 탭 "Artifact 판" 표.
+- Plotly 는 cdnjs 2.35.3 을 chart·widget 이 있을 때만 불러온다. 표는 10만 행 이상도 된다 (200행씩 그림, 그래프는 4,000점 넘으면 WebGL).

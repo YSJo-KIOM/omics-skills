@@ -84,6 +84,16 @@ if (which === "analysis") {
   ok("review markdown includes widget conditions", r.md.includes("## 탐색 조건") && r.md.includes("- **padj <**: ") && r.md.includes("- 결과: DEG") && r.md.includes("- **유의수준 α**: 0.01"), r.md.split("## 탐색 조건")[1]?.slice(0, 300).replace(/\n/g, " | "));
   r = await ev(H + `$('#ir-basket [data-a="clear"]').click();await w(100);$('#ir-basket [data-a="clear"]').click();await w(300);return $('#ir-bkn').textContent;`);
   ok("basket clear needs two clicks and empties", r === "0", r);
+} else if (which === "trimmed") {
+  // analysis example built with --artifact and tables.deg.artifact.top = 150
+  const r = await ev(H + `const sec=$('#sec-deg');const note=(sec.querySelector('.trimnote')||{}).textContent||'';const c=sec.querySelector('.cnt').textContent;
+    $$('#ir-nav button').find(b=>b.textContent==='기준 탐색').click();await w(700);const wt=$('#wg-deg-threshold .wg-trim');const wtShown=!!(wt&&wt.offsetParent);
+    $$('#ir-nav button').find(b=>b.textContent==='분석 환경·기타').click();await w(300);const env=$('#sec-env').innerText;
+    return {note,c,wt:wt?wt.textContent:'',wtShown,env:env.includes('Artifact 판')&&env.includes('400행 → 150행')};`);
+  ok("trimmed: table notice names original size", r.note.includes("원본 400행") && r.note.includes("150행"), r.note);
+  ok("trimmed: count shows original rows", r.c.includes("(원본 400행 중)"), r.c);
+  ok("trimmed: widget warns it computes on the cut table", r.wtShown && r.wt.includes("400행 중 150행"), r.wt);
+  ok("trimmed: environment tab lists the cut", r.env);
 } else if (which === "explainer") {
   const r = await ev(H + `$$('#ir-nav button').find(b=>b.textContent==='GBDT 원리').click();await w(900);const wg=$('#wg-gbdt');
     const card=k=>wg.querySelectorAll('.wg-cards .card b')[k].textContent;const plots=()=>wg.querySelectorAll('.wg-plot');
