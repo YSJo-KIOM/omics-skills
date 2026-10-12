@@ -1,0 +1,67 @@
+{
+ "meta": {"id": "example-literature", "title": "예시 · RNA-seq 분석 도구 문헌 정리", "subtitle": "문헌 보고 용도 시연 — 차등발현·기능 분석 방법 논문 5편", "author": "interactive-report 예시"},
+ "tables": {
+  "papers": {
+   "title": "방법 논문",
+   "key": "tool",
+   "sort": "year",
+   "rows": [
+    {"tool": "DESeq2", "category": "차등발현", "year": 2014, "journal": "Genome Biology", "first_author": "Love MI", "pmid": "25516281", "doi": "10.1186/s13059-014-0550-8",
+     "approach": "음이항 GLM. 유전자 간 정보를 빌려 dispersion 과 log fold change 를 경험적 베이즈로 수축(shrinkage)한다.",
+     "fits": "반복이 있는 count 데이터의 표준 선택. 수축된 LFC 로 효과 크기 순위를 매기기 좋다.", "tags": "count;negative binomial;shrinkage"},
+    {"tool": "edgeR", "category": "차등발현", "year": 2010, "journal": "Bioinformatics", "first_author": "Robinson MD", "pmid": "19910308", "doi": "10.1093/bioinformatics/btp616",
+     "approach": "음이항 모형. 경험적 베이즈로 유전자별 dispersion 을 조정하고 exact test 또는 GLM 으로 검정한다.",
+     "fits": "반복이 적은 설계, 복잡한 GLM 설계(quasi-likelihood F-test)에 쓴다.", "tags": "count;negative binomial"},
+    {"tool": "limma", "category": "차등발현", "year": 2015, "journal": "Nucleic Acids Research", "first_author": "Ritchie ME", "pmid": "25605792", "doi": "10.1093/nar/gkv007",
+     "approach": "선형 모형 + 경험적 베이즈 moderated t. RNA-seq 은 voom 으로 평균-분산 관계를 가중치로 바꿔 넣는다.",
+     "fits": "마이크로어레이와 RNA-seq 을 같은 틀로 다룰 때, 표본이 많고 설계가 복잡할 때.", "tags": "linear model;microarray;voom"},
+    {"tool": "GSEA", "category": "기능 분석", "year": 2005, "journal": "PNAS", "first_author": "Subramanian A", "pmid": "16199517", "doi": "10.1073/pnas.0506580102",
+     "approach": "전체 유전자 순위에서 유전자 집합이 위·아래 끝에 몰리는지 누적 enrichment score 와 순열검정으로 본다.",
+     "fits": "임계값 없이 전체 순위를 쓰고 싶을 때. 작은 효과가 한 경로에 모이는 경우를 잡는다.", "tags": "ranked list;permutation"},
+    {"tool": "clusterProfiler", "category": "기능 분석", "year": 2012, "journal": "OMICS", "first_author": "Yu G", "pmid": "22455463", "doi": "10.1089/omi.2011.0118",
+     "approach": "GO·KEGG 등에 대한 과대표현 분석(초기하분포)과 여러 유전자 군집 간 기능 비교.",
+     "fits": "DEG 목록의 ORA, 여러 비교(군집)의 기능을 한 그림에서 비교할 때. 이후 버전에 GSEA 도 들어 있다.", "tags": "ORA;GO;KEGG"}
+   ],
+   "columns": [
+    "tool",
+    {"key": "category", "type": "cat", "label": "분류", "badges": {"차등발현": "acc", "기능 분석": "good"}},
+    {"key": "year", "label": "연도"},
+    {"key": "journal", "type": "cat", "label": "학술지"},
+    {"key": "first_author", "label": "제1저자"},
+    {"key": "pmid", "type": "link", "label": "PMID", "link": "https://pubmed.ncbi.nlm.nih.gov/{v}/"},
+    {"key": "doi", "type": "link", "label": "DOI", "link": "https://doi.org/{v}"},
+    {"key": "approach", "label": "방법 요지", "wrap": true},
+    {"key": "fits", "label": "적합한 상황", "wrap": true},
+    {"key": "tags", "type": "cat", "sep": ";", "label": "키워드"}
+   ]
+  }
+ },
+ "tabs": [
+  {"id": "summary", "title": "요약", "role": "summary", "blocks": [
+   {"type": "cards", "items": [{"value": 5, "label": "정리한 논문"}, {"value": 3, "label": "차등발현 도구"}, {"value": 2, "label": "기능 분석 방법"}, {"value": "2005–2015", "label": "발표 연도"}]},
+   "## 결론\n\n- 반복이 있는 count 데이터는 **DESeq2** 또는 **edgeR** 가 표준이다 (PMID 25516281, PMID 19910308).\n- 표본이 많거나 어레이와 함께 다루면 **limma-voom** 이 편하다 (doi:10.1093/nar/gkv007).\n- 기능 분석은 DEG 목록이면 ORA(**clusterProfiler**), 전체 순위면 **GSEA** 를 쓴다.\n\n## 이 보고서의 용도\n\n문헌 보고형 예시다. **근거 표** 탭에서 키워드·분류로 거르고, 관심 논문을 바구니에 담은 뒤 **도구 선택** 탭에서 결정을 Markdown 으로 뽑는다."
+  ]},
+  {"id": "evidence", "title": "근거 표", "blocks": [
+   {"type": "table", "table": "papers", "intro": "PMID·DOI 를 누르면 원문으로 갑니다. 키워드 열은 값 하나로 거를 수 있습니다(여러 값이 든 칸도 포함 여부로 판정)."},
+   {"type": "chart", "title": "분류별 논문 수", "table": "papers", "kind": "bar", "x": "category", "height": 280}
+  ]},
+  {"id": "decide", "title": "도구 선택", "blocks": [
+   {"type": "review", "id": "tool-choice", "md_title": "RNA-seq 분석 도구 선택 — 결정 기록", "items": [
+    {"id": "de", "title": "차등발현 도구", "desc": "반복 수와 설계 복잡도에 따라 고릅니다.", "fields": [
+     {"id": "tool", "label": "주 도구", "type": "choice", "options": [
+      {"v": "deseq2", "l": "DESeq2", "d": "반복 ≥3, 표준 설계", "r": "Love 2014, PMID 25516281", "rec": true},
+      {"v": "edger", "l": "edgeR (QL F-test)", "d": "반복이 적거나 GLM 설계가 복잡할 때", "r": "Robinson 2010, PMID 19910308"},
+      {"v": "limma", "l": "limma-voom", "d": "표본이 많을 때, 어레이와 통합할 때", "r": "Ritchie 2015, PMID 25605792"}]},
+     {"id": "why", "label": "선택 이유", "type": "textarea"}]},
+    {"id": "fx", "title": "기능 분석", "fields": [
+     {"id": "methods", "label": "방법", "type": "multi", "options": [
+      {"v": "ora", "l": "ORA (clusterProfiler)", "r": "Yu 2012, PMID 22455463"},
+      {"v": "gsea", "l": "GSEA (전체 순위)", "r": "Subramanian 2005, PMID 16199517"}]}]}
+   ]}
+  ]}
+ ],
+ "environment": {
+  "data": [{"desc": "논문 서지 (PubMed)", "path": "https://pubmed.ncbi.nlm.nih.gov/"}],
+  "notes": "- 시연용 요약이다. 방법 요지는 각 논문 초록 수준의 설명이며 체계적 문헌고찰이 아니다.\n- 실제 문헌 보고서에서는 검색식, 검색일, 포함·제외 기준을 여기에 적는다."
+ }
+}

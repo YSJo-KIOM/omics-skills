@@ -1,0 +1,689 @@
+<title>%%TITLE%%</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: sticky header (title + tab nav) over one visible tab; JSON-driven blocks; fixed selection basket bottom-right.
+   Tokens follow the EK-7 / COPD Atlas / TGFB2 report family. */
+:root{
+  --bg:#f7f7f5;--card:#ffffff;--ink:#1d1f1e;--mut:#646a67;--line:#e2e3df;--edge:#c8cbc6;--soft:#f0f2ef;--soft2:#fafaf8;
+  --acc:#2f6f5e;--acc-ink:#ffffff;--chip:#eaf2ef;--sel:#fff1c7;
+  --warn:#a3302a;--warnbg:#fbefee;--good:#2b7a4b;--goodbg:#e7f3eb;--tipbg:#eef1f8;--tip:#3b4f8f;
+  --up:#c0392b;--dn:#2366a8;--ns:#b4b9b5;
+  --c1:#2f6f5e;--c2:#b5651d;--c3:#7b4fa0;--c4:#2366a8;--c5:#c0392b;--c6:#6b8e23;--c7:#c2185b;--c8:#5d6d7e;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13171a;--card:#1a1f22;--ink:#e7ebe9;--mut:#9aa39f;--line:#2a3236;--edge:#3b444a;--soft:#222a2e;--soft2:#1e2529;
+  --acc:#62b59a;--acc-ink:#10241d;--chip:#1d2a27;--sel:#3a3320;
+  --warn:#e9857c;--warnbg:#2c1d1c;--good:#7ccb98;--goodbg:#17301f;--tipbg:#1c2233;--tip:#9fb2ee;
+  --up:#ec7b6b;--dn:#64a6e6;--ns:#4a5357;
+  --c1:#62b59a;--c2:#e0a060;--c3:#b28ad6;--c4:#5b9ee0;--c5:#e5705f;--c6:#a6c45a;--c7:#f06292;--c8:#9aa8b6;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13171a;--card:#1a1f22;--ink:#e7ebe9;--mut:#9aa39f;--line:#2a3236;--edge:#3b444a;--soft:#222a2e;--soft2:#1e2529;
+  --acc:#62b59a;--acc-ink:#10241d;--chip:#1d2a27;--sel:#3a3320;
+  --warn:#e9857c;--warnbg:#2c1d1c;--good:#7ccb98;--goodbg:#17301f;--tipbg:#1c2233;--tip:#9fb2ee;
+  --up:#ec7b6b;--dn:#64a6e6;--ns:#4a5357;
+  --c1:#62b59a;--c2:#e0a060;--c3:#b28ad6;--c4:#5b9ee0;--c5:#e5705f;--c6:#a6c45a;--c7:#f06292;--c8:#9aa8b6;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.6}
+a{color:var(--acc)}
+:is(a,button,input,select,textarea,summary,th[tabindex],tr[tabindex]):focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+code,pre,.mono{font-family:var(--f-mono);font-size:12.5px}
+code{background:var(--soft);padding:1px 5px;border-radius:3px}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:10px 12px;overflow-x:auto;line-height:1.55}
+pre code{background:none;padding:0}
+#ir-head{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.hwrap{max-width:1500px;margin:0 auto;padding-inline:24px;padding-block:14px 10px}
+h1{font-size:20px;margin:0 0 2px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:17px;border-left:5px solid var(--acc);padding-left:10px;margin:24px 0 8px;text-wrap:balance}
+h3{font-size:14.5px;margin:22px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;text-wrap:balance}
+h4{font-size:13px;margin:16px 0 4px;color:var(--acc)}
+.sub{font-size:12.5px;color:var(--mut)}
+nav#ir-nav{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+nav#ir-nav button{border:1px solid var(--edge);background:var(--soft);color:var(--ink);padding:5px 13px;border-radius:14px;cursor:pointer;font:inherit;font-size:12.5px}
+nav#ir-nav button[aria-current="page"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+main{max-width:1500px;margin:0 auto;padding-inline:24px;padding-block:14px 140px}
+.prose p,.prose li,.prose blockquote{max-width:72ch}
+.prose blockquote{margin:8px 0;padding:4px 12px;border-left:3px solid var(--edge);color:var(--mut)}
+.prose table{border-collapse:collapse;font-size:12.5px;margin:8px 0;display:block;overflow-x:auto;max-width:100%}
+.prose th,.prose td{border-bottom:1px solid var(--line);padding:4px 10px;text-align:left;vertical-align:top}
+.prose th{background:var(--soft)}
+.blk{min-width:0}
+.blk>.intro{color:var(--mut);font-size:13px;margin:-2px 0 8px;max-width:90ch}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:11px 14px;min-width:0}
+.card b{display:block;font-size:24px;font-weight:500;font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--acc);overflow-wrap:anywhere}
+.card span{font-size:12.5px;color:var(--mut)}
+.card small{display:block;font-size:11.5px;color:var(--mut);margin-top:3px}
+.card.t-up b{color:var(--up)}.card.t-down b{color:var(--dn)}.card.t-warn b{color:var(--warn)}.card.t-good b{color:var(--good)}
+.callout{border-left:4px solid var(--acc);background:var(--chip);padding:9px 13px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13.5px}
+.callout>b{display:block;margin-bottom:2px}
+.callout p{margin:4px 0}.callout ul{margin:4px 0;padding-left:18px}
+.callout.t-warn{border-color:var(--warn);background:var(--warnbg)}
+.callout.t-good{border-color:var(--good);background:var(--goodbg)}
+.callout.t-tip{border-color:var(--tip);background:var(--tipbg)}
+table.kv{border-collapse:collapse;font-size:13px;width:100%;max-width:1100px}
+table.kv th,table.kv td{border-bottom:1px solid var(--line);padding:5px 10px;text-align:left;vertical-align:top}
+table.kv th{width:28%;min-width:120px;color:var(--mut);font-weight:500}
+table.kv td{overflow-wrap:anywhere}
+dl.gl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 16px;font-size:13px;margin:8px 0}
+dl.gl dt{font-weight:600;color:var(--acc)}dl.gl dd{margin:0;color:var(--mut)}
+details.dt{margin:10px 0;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 14px}
+details.dt>summary{cursor:pointer;font-weight:500;padding:4px 0}
+.figs{display:grid;gap:14px;margin:10px 0}
+figure{margin:0;min-width:0}
+figure img{max-width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:zoom-in;display:block}
+figcaption{font-size:12px;color:var(--mut);margin-top:4px}
+#ir-lb{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:30;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+#ir-lb img{max-width:96vw;max-height:94vh;background:#fff}
+/* tables */
+.tblock{margin:6px 0 18px;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow:hidden}
+.tbar{display:flex;gap:6px 8px;align-items:center;padding:7px 9px;background:var(--soft);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.gs{flex:1 1 200px;min-width:0;padding:5px 9px;border:1px solid var(--edge);border-radius:4px;font:inherit;font-size:12.5px;background:var(--card);color:var(--ink)}
+.cnt{font-size:11.5px;color:var(--mut);white-space:nowrap;font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--edge);background:var(--card);color:var(--ink);border-radius:4px;padding:4px 9px;font:inherit;font-size:11.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.tw{overflow:auto;background:var(--card)}
+.tbl{border-collapse:collapse;font-size:12px;width:max-content;min-width:100%}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.tbl thead tr.hrow th{background:var(--soft);cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0;z-index:2}
+.tbl thead tr.frow th{position:sticky;top:29px;z-index:1;background:var(--soft2);padding:3px 5px;cursor:default;vertical-align:top;font-weight:400}
+.tbl th.sa::after{content:" \25B2";font-size:9px;color:var(--acc)}.tbl th.sd::after{content:" \25BC";font-size:9px;color:var(--acc)}
+.tbl th .q{color:var(--mut);font-size:10px;margin-left:2px}
+.tbl td{white-space:nowrap;font-variant-numeric:tabular-nums;max-width:360px;overflow:hidden;text-overflow:ellipsis}
+.tbl td.num{font-family:var(--f-mono);font-size:11.5px;text-align:right}
+.tbl td.up{color:var(--up)}.tbl td.dn{color:var(--dn)}
+.tbl td.clip{padding:0;white-space:normal;min-width:240px;max-width:420px;overflow-wrap:anywhere}
+.tbl td.clip .cc{max-height:3em;overflow:hidden;padding:4px 8px;cursor:zoom-in;position:relative}
+.tbl td.clip .cc::after{content:"";position:absolute;left:0;right:0;bottom:0;height:11px;background:linear-gradient(transparent,var(--card))}
+.tbl td.clip .cc.open{max-height:none;cursor:zoom-out}.tbl td.clip .cc.open::after{display:none}
+.tbl tbody tr{cursor:pointer}.tbl tbody tr:hover td{background:var(--soft2)}
+.tbl tbody tr.sel td{background:var(--sel)}
+.tbl td a{text-decoration:none;font-weight:500}.tbl td a:hover{text-decoration:underline}
+.cs,.cf{width:100%;min-width:72px;padding:2px 4px;border:1px solid var(--edge);border-radius:3px;font:inherit;font-size:11px;background:var(--card);color:var(--ink)}
+.cs{cursor:pointer}.cs.on,.cf.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.sl{--a:0%;--b:100%;position:relative;height:30px;min-width:100px;margin-top:3px}
+.sl::before{content:"";position:absolute;left:4px;right:4px;top:8px;height:5px;border-radius:3px;background:linear-gradient(to right,var(--edge) 0%,var(--edge) var(--a),var(--acc) var(--a),var(--acc) var(--b),var(--edge) var(--b),var(--edge) 100%)}
+.sl input[type=range]{position:absolute;left:0;top:1px;width:100%;margin:0;pointer-events:none;-webkit-appearance:none;appearance:none;background:transparent;height:14px}
+.sl input[type=range]::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--acc);cursor:pointer;border:2px solid var(--card);box-shadow:0 0 0 1px var(--edge)}
+.sl input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--acc);cursor:pointer;border:2px solid var(--card);box-shadow:0 0 0 1px var(--edge)}
+.sl .rv{position:absolute;left:0;top:16px;font-size:9.5px;color:var(--mut);font-family:var(--f-mono);white-space:nowrap}
+.more{display:flex;justify-content:center;gap:8px;padding:7px;border-top:1px solid var(--line);background:var(--soft2)}
+.pill{display:inline-block;font-size:10.5px;padding:0 7px;border-radius:9px;border:1px solid var(--edge);line-height:18px;margin-right:2px;color:var(--ink)}
+.pill.t-up{color:var(--up);border-color:var(--up)}.pill.t-down{color:var(--dn);border-color:var(--dn)}
+.pill.t-good{color:var(--good);border-color:var(--good)}.pill.t-warn{color:var(--warn);border-color:var(--warn)}
+.pill.t-acc{color:var(--acc);border-color:var(--acc)}.pill.t-mut{color:var(--mut)}
+/* charts */
+.chart{width:100%;min-height:260px;background:var(--card);border:1px solid var(--line);border-radius:8px}
+.chart-help{font-size:11.5px;color:var(--mut);margin:4px 2px 12px}
+.chart .nolib{padding:20px;color:var(--mut);font-size:13px}
+/* review */
+.rv-item{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0}
+.rv-item>h4{margin:2px 0 4px;color:var(--ink);font-size:14px}
+.rv-item>.desc{color:var(--mut);font-size:12.5px;margin-bottom:6px}
+.rv-f{display:grid;grid-template-columns:minmax(110px,180px) minmax(0,1fr);gap:4px 14px;padding:6px 0;border-top:1px dashed var(--line)}
+.rv-f>.lab{font-size:12.5px;font-weight:500;color:var(--mut);padding-top:2px}
+.rv-opts{display:grid;gap:3px}
+.rv-opts label{display:flex;gap:7px;align-items:flex-start;font-size:13px;cursor:pointer}
+.rv-opts label input{margin-top:4px}
+.rv-opts .od{display:block;font-size:11.5px;color:var(--mut)}
+.rv-opts .ref{font-size:11px;color:var(--tip)}
+.badge{font-size:10px;padding:0 6px;border-radius:8px;margin-left:5px;vertical-align:1px}
+.badge.rec{background:var(--goodbg);color:var(--good)}.badge.warn{background:var(--warnbg);color:var(--warn)}
+.rv-f input[type=text],.rv-f input[type=number],.rv-f textarea{width:100%;font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--edge);border-radius:4px;background:var(--card);color:var(--ink)}
+.rv-f textarea{min-height:56px;resize:vertical}
+.rv-out{position:sticky;bottom:0;background:var(--bg);padding-block:8px;border-top:1px solid var(--line);margin-top:12px}
+.rv-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rv-actions label{font-size:12px;color:var(--mut);display:flex;gap:4px;align-items:center}
+.rv-out textarea{width:100%;height:200px;margin-top:8px;font-family:var(--f-mono);font-size:12px;background:var(--card);color:var(--ink);border:1px solid var(--edge);border-radius:6px;padding:8px}
+.rv-status{font-size:11.5px;color:var(--mut)}
+/* basket */
+#ir-basket{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:340px;max-width:calc(100vw - 32px);background:var(--card);border:1px solid var(--edge);border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.18);font-size:12px;z-index:8}
+#ir-basket .bk-head{display:flex;gap:8px;align-items:center;padding:8px 12px}
+#ir-basket .bk-head b{flex:1}
+#ir-basket .bk-body{border-top:1px solid var(--line);padding:8px 12px;max-height:50vh;overflow:auto}
+#ir-basket.min .bk-body{display:none}
+#ir-basket .bk-grp{margin-bottom:8px}
+#ir-basket .bk-grp>div{font-weight:600;color:var(--acc);margin-bottom:2px}
+#ir-basket ul{list-style:none;margin:0;padding:0}
+#ir-basket li{display:flex;gap:6px;align-items:center;padding:1px 0;border-bottom:1px dotted var(--line)}
+#ir-basket li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-mono);font-size:11.5px}
+#ir-basket li button{border:0;background:none;color:var(--mut);cursor:pointer;font-size:14px;line-height:1}
+#ir-basket .bk-actions{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+#ir-basket .bkn{font-family:var(--f-mono);color:var(--acc);font-weight:500}
+/* dialog / toast */
+#ir-dlg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+#ir-dlg .dlg{background:var(--card);border-radius:8px;padding:14px;width:min(760px,100%);display:grid;gap:8px}
+#ir-dlg textarea{width:100%;height:300px;font-family:var(--f-mono);font-size:12px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:4px}
+#ir-dlg .acts{display:flex;gap:8px;justify-content:flex-end}
+#ir-toast{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:6px 14px;border-radius:14px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+#ir-toast.on{opacity:1}
+@media (max-width:640px){.hwrap,main{padding-inline:16px}.rv-f{grid-template-columns:minmax(0,1fr)}table.kv th{width:38%}#ir-basket{right:8px;width:calc(100vw - 16px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+%%PLOTLY%%
+<!--IR-BODY-->
+<header id="ir-head"><div class="hwrap"><h1 id="ir-title"></h1><div class="sub" id="ir-sub"></div><nav id="ir-nav" aria-label="보고서 탭"></nav></div></header>
+<main id="ir-main"></main>
+<aside id="ir-basket" class="min" aria-label="선택 바구니">
+  <div class="bk-head"><b>선택 바구니 <span class="bkn" id="ir-bkn">0</span>행</b><button class="btn" type="button" id="ir-bktog" aria-expanded="false">펼치기</button></div>
+  <div class="bk-body">
+    <div id="ir-bklist"></div>
+    <div class="bk-actions"><button class="btn pri" type="button" data-a="copy">TSV 복사</button><button class="btn" type="button" data-a="save">TSV 저장</button><button class="btn" type="button" data-a="clear">비우기</button></div>
+    <div class="sub">표의 행을 누르거나, 그래프의 점을 누르거나 올가미로 고르면 담깁니다. 다음 단계 입력용으로 TSV 를 복사·저장하세요.</div>
+  </div>
+</aside>
+<div id="ir-lb" hidden><img alt=""></div>
+<div id="ir-dlg" hidden role="dialog" aria-modal="true" aria-labelledby="ir-dlg-t"><div class="dlg"><div id="ir-dlg-t"></div><textarea readonly aria-label="내용"></textarea><div class="acts"><button class="btn" type="button" data-a="sel">전체 선택</button><button class="btn pri" type="button" data-a="close">닫기</button></div></div></div>
+<div id="ir-toast" role="status" aria-live="polite"></div>
+<script type="application/json" id="ir-data">%%DATA%%</script>
+<script>
+(function () {
+"use strict";
+const R = JSON.parse(document.getElementById("ir-data").textContent);
+const M = R.meta || {};
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const isNum = v => typeof v === "number" && isFinite(v);
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- per-viewer storage (convenience only; the page works without it) ---------- */
+const NS = "ir:" + (M.id || M.title || "report");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(NS + ":" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(NS + ":" + k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } }
+};
+
+/* ---------- feedback, copy, save ---------- */
+function toast(m) { const t = $("#ir-toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800); }
+function flash(btn, msg) { if (!btn) return; if (!btn.dataset.lbl) btn.dataset.lbl = btn.textContent; btn.textContent = msg; clearTimeout(btn._h); btn._h = setTimeout(() => { btn.textContent = btn.dataset.lbl; }, 1500); }
+function showText(text, title) {
+  const d = $("#ir-dlg"); $("#ir-dlg-t", d).textContent = title || ""; $("textarea", d).value = text; d.hidden = false; $("textarea", d).focus(); $("textarea", d).select();
+}
+function copyText(text, btn) {
+  const ok = () => flash(btn, "복사됨");
+  const fallback = () => {
+    const ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select(); let done = false; try { done = document.execCommand("copy"); } catch (e) { done = false; } ta.remove();
+    if (done) ok(); else showText(text, "복사가 막혀 있습니다. 아래 내용을 선택해 직접 복사하세요 (Ctrl/Cmd+C).");
+  };
+  try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (e) { fallback(); }
+}
+const inViewer = !!(window.claude && typeof window.claude.use === "function");
+let dlP = null;
+function downloadsCap() { if (!dlP) dlP = inViewer ? Promise.resolve(window.claude.use("downloads")).catch(() => null) : Promise.resolve(null); return dlP; }
+if (inViewer) downloadsCap();
+function saveFile(name, text, btn) {
+  if (!inViewer) {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type: "text/plain;charset=utf-8"})); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0); flash(btn, "저장됨"); return;
+  }
+  // the viewer's save allowlist has csv/txt/md/json but not tsv: tab-separated text goes out as .txt
+  const fname = name.replace(/\.tsv$/i, ".txt");
+  downloadsCap().then(d => {
+    if (!d) { showText(text, "이 보기에서는 파일 저장을 쓸 수 없습니다. 아래 내용을 복사해 쓰세요."); return; }
+    d.save({filename: fname, data: text}).then(() => flash(btn, "저장됨"), e => {
+      const c = e && e.code;
+      if (c === "declined") flash(btn, "취소됨");
+      else if (c === "rate_limited") toast("저장 확인 창이 이미 열려 있습니다");
+      else showText(text, "저장하지 못했습니다 (" + (c || "오류") + "). 아래 내용을 복사해 쓰세요.");
+    });
+  });
+}
+function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function fileStem() { return String(M.id || M.title || "report").replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 60); }
+
+/* ---------- formatting ---------- */
+function fmtNum(v, c) {
+  if (!isNum(v)) return v == null ? "" : esc(v);
+  c = c || {};
+  if (c.fmt === "int") return Math.round(v).toLocaleString();
+  if (c.fmt === "pct") return (v * 100).toFixed(c.dp == null ? 1 : c.dp) + "%";
+  if (c.fmt === "sci") return v.toExponential(c.dp == null ? 2 : c.dp);
+  if (c.dp != null) return v.toFixed(c.dp);
+  if (Number.isInteger(v)) return String(v);
+  const a = Math.abs(v);
+  if (a !== 0 && (a < 1e-3 || a >= 1e6)) return v.toExponential(2);
+  return String(+v.toPrecision(4));
+}
+function fmtAny(v) { return isNum(v) ? fmtNum(v) : esc(v); }
+const tokens = (v, sep) => v == null || v === "" ? [] : (sep ? String(v).split(sep).map(s => s.trim()).filter(Boolean) : [String(v)]);
+function safeUrl(u) { return /^(https?:)?\/\//i.test(u) || /^(mailto:|#)/i.test(u) ? u : ""; }
+function linkUrl(tpl, v) { if (!tpl || tpl === "{v}") return safeUrl(v); return tpl.replace(/\{v\}/g, encodeURIComponent(v).replace(/%2F/gi, "/").replace(/%3A/gi, ":")); }
+const DIRC = {up: "--up", down: "--dn", dn: "--dn", ns: "--ns", "n.s.": "--ns", none: "--ns", "not sig": "--ns", "not significant": "--ns"};
+
+/* ---------- basket ---------- */
+const BASKET = new Map();            // "tableId:rowIndex" -> {tid, i}
+const BKEY = "basket:" + (R.build || "");
+const bkey = (tid, i) => tid + ":" + i;
+const TABLE_VIEWS = {};              // tableId -> table instances (blocks)
+const CHARTS = [];
+function keyLabel(tid, i) { const D = R.tables[tid]; const v = D.rows[i][D.key]; return v == null || v === "" ? "#" + (i + 1) : String(v); }
+function setBasket(tid, idxs, on) {
+  idxs.forEach(i => { const k = bkey(tid, i); if (on === undefined ? !BASKET.has(k) : on) BASKET.set(k, {tid, i}); else BASKET.delete(k); });
+  store.set(BKEY, Array.from(BASKET.keys()));
+  (TABLE_VIEWS[tid] || []).forEach(T => $$("tbody tr", T.tbl).forEach(tr => tr.classList.toggle("sel", BASKET.has(bkey(tid, +tr.dataset.i)))));
+  CHARTS.forEach(C => { if (C.b.table === tid && C.drawn) schedule(C); });
+  renderBasket();
+}
+function tsvOf(tid, idxs) {
+  const D = R.tables[tid], cl = v => v == null ? "" : String(v).replace(/[\t\r\n]+/g, " ");
+  return [D.columns.map(c => c.key).join("\t")].concat(idxs.map(i => D.columns.map(c => cl(D.rows[i][c.key])).join("\t"))).join("\n");
+}
+function basketGroups() {
+  const g = new Map();
+  BASKET.forEach(v => { if (!g.has(v.tid)) g.set(v.tid, []); g.get(v.tid).push(v.i); });
+  g.forEach(a => a.sort((x, y) => x - y));
+  return g;
+}
+function basketTSV() {
+  const g = basketGroups();
+  if (g.size === 1) { const [tid, idxs] = g.entries().next().value; return tsvOf(tid, idxs); }
+  return Array.from(g, ([tid, idxs]) => "# table: " + (R.tables[tid].title || tid) + "\n" + tsvOf(tid, idxs)).join("\n\n");
+}
+function renderBasket() {
+  $("#ir-bkn").textContent = BASKET.size;
+  const g = basketGroups();
+  $("#ir-bklist").innerHTML = g.size ? Array.from(g, ([tid, idxs]) => '<div class="bk-grp"><div>' + esc(R.tables[tid].title || tid) + " (" + idxs.length + ")</div><ul>" +
+    idxs.slice(0, 60).map(i => '<li><span title="' + esc(keyLabel(tid, i)) + '">' + esc(keyLabel(tid, i)) + '</span><button type="button" aria-label="빼기" data-t="' + esc(tid) + '" data-i="' + i + '">×</button></li>').join("") +
+    (idxs.length > 60 ? '<li><span>… 외 ' + (idxs.length - 60) + "행</span></li>" : "") + "</ul></div>").join("") : '<div class="sub">아직 담은 행이 없습니다.</div>';
+}
+function initBasket() {
+  const ids = store.get(BKEY, []);
+  ids.forEach(k => { const p = k.lastIndexOf(":"), tid = k.slice(0, p), i = +k.slice(p + 1); if (R.tables[tid] && R.tables[tid].rows[i]) BASKET.set(k, {tid, i}); });
+  const box = $("#ir-basket"), tog = $("#ir-bktog");
+  tog.addEventListener("click", () => { const min = box.classList.toggle("min"); tog.textContent = min ? "펼치기" : "접기"; tog.setAttribute("aria-expanded", String(!min)); });
+  $("#ir-bklist").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) setBasket(b.dataset.t, [+b.dataset.i], false); });
+  box.addEventListener("click", e => {
+    const b = e.target.closest("button[data-a]"); if (!b) return;
+    if (!BASKET.size && b.dataset.a !== "clear") { flash(b, "비어 있음"); return; }
+    if (b.dataset.a === "copy") copyText(basketTSV(), b);
+    else if (b.dataset.a === "save") saveFile(fileStem() + "_selected.tsv", basketTSV(), b);
+    else if (b.dataset.a === "clear") {
+      if (b.dataset.armed !== "1") { b.dataset.armed = "1"; flash(b, "한 번 더 누르면 비움"); setTimeout(() => { b.dataset.armed = ""; }, 1500); return; }
+      b.dataset.armed = ""; const all = Array.from(BASKET.values()); BASKET.clear();
+      new Set(all.map(v => v.tid)).forEach(tid => setBasket(tid, [], false)); renderBasket(); store.set(BKEY, []);
+    }
+  });
+  renderBasket();
+}
+
+/* ---------- numeric filter expressions: ">=1", "<0.05", "abs>=1", ">0 <5" ---------- */
+function testExpr(expr, v) {
+  const parts = expr.trim().split(/\s+|&+/).filter(Boolean);
+  const re = /^(abs|\|x\|)?\s*(>=|<=|>|<|=|==|!=)\s*(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)$/i;
+  const tests = parts.map(p => p.match(re));
+  if (tests.every(Boolean)) {
+    if (!isNum(v)) return false;
+    return tests.every(m => { const x = m[1] ? Math.abs(v) : v, y = parseFloat(m[3]);
+      switch (m[2]) { case ">": return x > y; case "<": return x < y; case ">=": return x >= y; case "<=": return x <= y; case "!=": return x !== y; default: return x === y; } });
+  }
+  return String(v == null ? "" : v).toLowerCase().includes(expr.trim().toLowerCase());
+}
+function cmpVals(x, y) {
+  if (isNum(x) && isNum(y)) return x - y;
+  return String(x).localeCompare(String(y), "ko", {numeric: true});
+}
+
+/* ---------- interactive table ---------- */
+let seq = 0;
+function makeTable(host, b) {
+  const D = R.tables[b.table];
+  const T = {D, b, view: [], shown: 0, sort: null, f: {}, g: "", page: b.page || 200, rng: {}, listeners: []};
+  (TABLE_VIEWS[D.id] = TABLE_VIEWS[D.id] || []).push(T);
+  const cols = D.columns, uid = "t" + (++seq);
+  let h = '<div class="tblock"><div class="tbar"><input class="gs" type="search" placeholder="검색 (모든 열)" aria-label="표 전체 검색">' +
+    '<span class="cnt"></span><button class="btn" type="button" data-a="reset">필터 초기화</button>' +
+    '<button class="btn" type="button" data-a="add" title="필터를 통과한 모든 행을 선택 바구니에 담습니다">보이는 행 담기</button>' +
+    '<button class="btn" type="button" data-a="copy">TSV 복사</button><button class="btn" type="button" data-a="save">TSV 저장</button></div>' +
+    '<div class="tw" style="max-height:' + (b.height || 620) + 'px"><table class="tbl" id="' + uid + '"><thead><tr class="hrow">';
+  cols.forEach((c, i) => { h += '<th tabindex="0" data-i="' + i + '" title="' + esc(c.tip || c.key) + '"' + (c.width ? ' style="min-width:' + (+c.width) + 'px"' : "") + ">" + esc(c.label || c.key) + (c.tip ? '<span class="q" aria-hidden="true">?</span>' : "") + "</th>"; });
+  h += '</tr><tr class="frow">';
+  cols.forEach((c, i) => {
+    if (c.filter === false) { h += "<th></th>"; return; }
+    if (c.type === "cat") {
+      const vals = Array.from(new Set(D.rows.flatMap(r => tokens(r[c.key], c.sep)))).sort((x, y) => cmpVals(x, y));
+      h += '<th><select class="cs" data-i="' + i + '" aria-label="' + esc(c.label || c.key) + ' 선택"><option value="">전체</option>' + vals.map(v => '<option value="' + esc(v) + '">' + esc(v) + "</option>").join("") + "</select></th>";
+    } else if (c.type === "num") {
+      const vs = D.rows.map(r => r[c.key]).filter(isNum);
+      let lo = vs.length ? Math.min.apply(null, vs) : 0, hi = vs.length ? Math.max.apply(null, vs) : 1;
+      if (c.range) { lo = Math.max(lo, c.range[0]); hi = Math.min(hi, c.range[1]); }
+      T.rng[i] = [lo, hi]; const st = (hi - lo) / 200 || 1;
+      h += '<th><input class="cf" type="text" data-i="' + i + '" placeholder="≥, <, abs>=" aria-label="' + esc(c.label || c.key) + ' 조건 (예: >=1, <0.05, abs>=1)">' +
+        '<div class="sl"><input type="range" class="rmin" data-i="' + i + '" min="' + lo + '" max="' + hi + '" step="' + st + '" value="' + lo + '" aria-label="' + esc(c.label || c.key) + ' 최소">' +
+        '<input type="range" class="rmax" data-i="' + i + '" min="' + lo + '" max="' + hi + '" step="' + st + '" value="' + hi + '" aria-label="' + esc(c.label || c.key) + ' 최대">' +
+        '<span class="rv">' + fmtNum(lo, c) + " – " + fmtNum(hi, c) + "</span></div></th>";
+    } else {
+      h += '<th><input class="cf" type="text" data-i="' + i + '" placeholder="포함 검색" aria-label="' + esc(c.label || c.key) + ' 검색"></th>';
+    }
+  });
+  h += '</tr></thead><tbody></tbody></table></div><div class="more" hidden><button class="btn" type="button" data-a="more">' + T.page + '행 더 보기</button><button class="btn" type="button" data-a="all">모두 보기</button></div></div>';
+  host.insertAdjacentHTML("beforeend", h);
+  const blk = host.lastElementChild; T.blk = blk; T.tbl = $("table", blk); T.cnt = $(".cnt", blk);
+  let tmr = null; const later = () => { clearTimeout(tmr); tmr = setTimeout(() => apply(T), 120); };
+  $(".gs", blk).addEventListener("input", e => { T.g = e.target.value.trim().toLowerCase(); later(); });
+  $$(".cs", blk).forEach(el => el.addEventListener("change", () => { const f = T.f[el.dataset.i] = T.f[el.dataset.i] || {}; f.sel = el.value; el.classList.toggle("on", !!el.value); apply(T); }));
+  $$(".cf", blk).forEach(el => el.addEventListener("input", () => { const f = T.f[el.dataset.i] = T.f[el.dataset.i] || {}; f.t = el.value.trim(); el.classList.toggle("on", !!f.t); later(); }));
+  $$(".rmin,.rmax", blk).forEach(el => el.addEventListener("input", () => {
+    const i = el.dataset.i, c = cols[i], [L, H] = T.rng[i], wrap = el.parentNode, a = $(".rmin", wrap), z = $(".rmax", wrap);
+    let lo = +a.value, hi = +z.value; if (lo > hi) { if (el === a) { lo = hi; a.value = hi; } else { hi = lo; z.value = lo; } }
+    const span = (H - L) || 1; wrap.style.setProperty("--a", ((lo - L) / span * 100) + "%"); wrap.style.setProperty("--b", ((hi - L) / span * 100) + "%");
+    $(".rv", wrap).textContent = fmtNum(lo, c) + " – " + fmtNum(hi, c);
+    const f = T.f[i] = T.f[i] || {}; f.lo = lo <= L + 1e-12 * span ? null : lo; f.hi = hi >= H - 1e-12 * span ? null : hi; later();
+  }));
+  const sortBy = th => { const i = +th.dataset.i; const asc = !(T.sort && T.sort.i === i && T.sort.asc); T.sort = {i, asc}; $$("tr.hrow th", T.tbl).forEach(x => x.classList.remove("sa", "sd")); th.classList.add(asc ? "sa" : "sd"); apply(T); };
+  $$("tr.hrow th", T.tbl).forEach(th => { th.addEventListener("click", () => sortBy(th)); th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sortBy(th); } }); });
+  blk.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-a]");
+    if (btn) {
+      const a = btn.dataset.a;
+      if (a === "more") render(T, T.shown + T.page);
+      else if (a === "all") render(T, T.view.length);
+      else if (a === "reset") resetTable(T);
+      else if (a === "add") { setBasket(D.id, T.view, true); toast(T.view.length.toLocaleString() + "행을 바구니에 담았습니다"); }
+      else if (a === "copy") copyText(tsvOf(D.id, T.view), btn);
+      else if (a === "save") saveFile(fileStem() + "_" + String(D.id).replace(/\W+/g, "_") + ".tsv", tsvOf(D.id, T.view), btn);
+      return;
+    }
+    if (e.target.closest("a")) return;
+    const cc = e.target.closest(".cc"); if (cc) { cc.classList.toggle("open"); return; }
+    const tr = e.target.closest("tbody tr"); if (tr) setBasket(D.id, [+tr.dataset.i]);
+  });
+  T.tbl.tBodies[0].addEventListener("keydown", e => { const tr = e.target.closest("tr"); if (tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setBasket(D.id, [+tr.dataset.i]); } });
+  if (b.sort || D.sort) { const s = b.sort || D.sort, i = cols.findIndex(c => c.key === s.key); if (i >= 0) { T.sort = {i, asc: !s.desc}; $$("tr.hrow th", T.tbl)[i].classList.add(s.desc ? "sd" : "sa"); } }
+  apply(T);
+  return T;
+}
+function resetTable(T) {
+  T.f = {}; T.g = ""; $(".gs", T.blk).value = "";
+  $$(".cs,.cf", T.blk).forEach(e => { e.value = ""; e.classList.remove("on"); });
+  $$(".sl", T.blk).forEach(s => { const a = $(".rmin", s), z = $(".rmax", s), c = T.D.columns[a.dataset.i]; a.value = a.min; z.value = z.max; s.style.setProperty("--a", "0%"); s.style.setProperty("--b", "100%"); $(".rv", s).textContent = fmtNum(+a.min, c) + " – " + fmtNum(+z.max, c); });
+  apply(T);
+}
+function apply(T) {
+  const D = T.D, cols = D.columns, out = [];
+  const fs = Object.keys(T.f).map(k => [cols[k], T.f[k]]).filter(([, f]) => f.sel || f.t || f.lo != null || f.hi != null);
+  for (let i = 0; i < D.rows.length; i++) {
+    const r = D.rows[i];
+    if (T.g && !cols.some(c => r[c.key] != null && String(r[c.key]).toLowerCase().includes(T.g))) continue;
+    let ok = true;
+    for (const [c, f] of fs) {
+      const v = r[c.key];
+      if (f.sel && !tokens(v, c.sep).includes(f.sel)) { ok = false; break; }
+      if (f.t && !testExpr(f.t, v)) { ok = false; break; }
+      if (f.lo != null && !(isNum(v) && v >= f.lo)) { ok = false; break; }
+      if (f.hi != null && !(isNum(v) && v <= f.hi)) { ok = false; break; }
+    }
+    if (ok) out.push(i);
+  }
+  if (T.sort) {
+    const k = cols[T.sort.i].key, s = T.sort.asc ? 1 : -1;
+    out.sort((a, b) => { const x = D.rows[a][k], y = D.rows[b][k], xn = x == null || x === "", yn = y == null || y === ""; if (xn || yn) return xn && yn ? a - b : xn ? 1 : -1; return cmpVals(x, y) * s || a - b; });
+  }
+  T.view = out; render(T, T.page); T.listeners.forEach(fn => fn());
+}
+function cellHTML(c, v) {
+  if (v == null || v === "") return "<td></td>";
+  if (c.type === "num") return '<td class="num' + (c.tone === "sign" && isNum(v) ? (v > 0 ? " up" : v < 0 ? " dn" : "") : "") + '">' + fmtNum(v, c) + "</td>";
+  if (c.type === "link") return "<td>" + tokens(v, c.sep).map(p => { const u = linkUrl(c.link, p); return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(p) + "</a>" : esc(p); }).join(", ") + "</td>";
+  if (c.type === "cat" && (c.badges || c.sep)) return "<td>" + tokens(v, c.sep).map(p => '<span class="pill' + (c.badges && c.badges[p] ? " t-" + esc(c.badges[p]) : "") + '">' + esc(p) + "</span>").join("") + "</td>";
+  const s = String(v);
+  if (c.wrap) return '<td class="clip"><div class="cc">' + esc(s) + "</div></td>";
+  return "<td" + (s.length > 40 ? ' title="' + esc(s) + '"' : "") + ">" + esc(s) + "</td>";
+}
+function render(T, n) {
+  const D = T.D, cols = D.columns; n = Math.min(n, T.view.length);
+  let h = "";
+  for (let k = 0; k < n; k++) {
+    const i = T.view[k], r = D.rows[i];
+    h += '<tr tabindex="0" data-i="' + i + '"' + (BASKET.has(bkey(D.id, i)) ? ' class="sel"' : "") + ">";
+    for (const c of cols) h += cellHTML(c, r[c.key]);
+    h += "</tr>";
+  }
+  T.tbl.tBodies[0].innerHTML = h; T.shown = n;
+  T.cnt.textContent = n.toLocaleString() + "행 표시 · 필터 결과 " + T.view.length.toLocaleString() + " / 전체 " + D.rows.length.toLocaleString();
+  $(".more", T.blk).hidden = n >= T.view.length;
+}
+
+/* ---------- charts (plotly, linked to a table's filtered view) ---------- */
+function themeLayout(b) {
+  const ax = {gridcolor: cssv("--line"), zerolinecolor: cssv("--edge"), linecolor: cssv("--edge"), automargin: true};
+  return {paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: {family: cssv("--f-body"), color: cssv("--ink"), size: 12},
+    colorway: [1, 2, 3, 4, 5, 6, 7, 8].map(i => cssv("--c" + i)), margin: {l: 60, r: 20, t: b.title_in_plot ? 40 : 16, b: 50},
+    xaxis: Object.assign({}, ax), yaxis: Object.assign({}, ax), legend: {orientation: "h", y: -0.2}, hovermode: "closest"};
+}
+const TF = {"-log10": v => v > 0 ? -Math.log10(v) : null, log10: v => v > 0 ? Math.log10(v) : null, log2: v => v > 0 ? Math.log2(v) : null};
+function colorOf(b, val, k) {
+  if (b.colors && b.colors[val]) { const c = b.colors[val]; return c.startsWith("--") ? cssv(c) : c; }
+  const d = DIRC[String(val).toLowerCase()]; if (d) return cssv(d);
+  return cssv("--c" + ((k % 8) + 1));
+}
+function chartIdxs(C) {
+  const D = R.tables[C.b.table], ts = TABLE_VIEWS[C.b.table];
+  return ts && ts.length ? ts[0].view : D.rows.map((_, i) => i);
+}
+function buildChart(C) {
+  const b = C.b, D = R.tables[b.table], rows = D.rows, idxs = chartIdxs(C), L = themeLayout(b);
+  const lab = b.label || D.key, hov = i => esc(rows[i][lab]) + (b.hover || []).map(k => "<br>" + esc(k) + ": " + fmtAny(rows[i][k])).join("");
+  const tx = TF[b.x_transform] || (v => v), ty = TF[b.y_transform] || (v => v);
+  const axisTitle = (k, t) => (t ? t + "(" + k + ")" : k);
+  L.xaxis.title = {text: b.x_label || axisTitle(b.x || "", b.x_transform)}; L.yaxis.title = {text: b.y_label || axisTitle(b.y || (b.kind === "bar" || b.kind === "histogram" ? "count" : ""), b.y_transform)};
+  if (b.log_x) L.xaxis.type = "log"; if (b.log_y) L.yaxis.type = "log";
+  const shapes = [];
+  (b.lines && b.lines.x || []).forEach(v => shapes.push({type: "line", xref: "x", yref: "paper", x0: v, x1: v, y0: 0, y1: 1, line: {dash: "dash", width: 1, color: cssv("--mut")}}));
+  (b.lines && b.lines.y || []).forEach(v => shapes.push({type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: v, y1: v, line: {dash: "dash", width: 1, color: cssv("--mut")}}));
+  L.shapes = shapes;
+  const ccol = b.color ? D.columns.find(c => c.key === b.color) : null;
+  let traces = [];
+  if (b.kind === "scatter") {
+    const pts = idxs.filter(i => { const x = tx(rows[i][b.x]), y = ty(rows[i][b.y]); return isNum(x) && isNum(y); });
+    const typ = pts.length > 4000 ? "scattergl" : "scatter", sz = b.size || 6;
+    const mk = (ids, name, marker) => ({type: typ, mode: "markers", name, x: ids.map(i => tx(rows[i][b.x])), y: ids.map(i => ty(rows[i][b.y])), customdata: ids, text: ids.map(hov),
+      hovertemplate: "%{text}<br>" + esc(b.x) + ": %{x}<br>" + esc(b.y) + ": %{y}<extra></extra>", marker: Object.assign({size: sz, opacity: .8}, marker)});
+    if (ccol && ccol.type === "num") traces.push(mk(pts, b.color, {color: pts.map(i => rows[i][b.color]), colorscale: "RdBu", reversescale: true, showscale: true, colorbar: {title: {text: b.color}}}));
+    else if (ccol) { const g = new Map(); pts.forEach(i => { const v = rows[i][b.color] == null ? "NA" : String(rows[i][b.color]); if (!g.has(v)) g.set(v, []); g.get(v).push(i); });
+      Array.from(g.keys()).sort((x, y) => cmpVals(x, y)).forEach((v, k) => traces.push(mk(g.get(v), v, {color: colorOf(b, v, k)}))); }
+    else traces.push(mk(pts, "", {color: cssv("--acc")}));
+    const sel = pts.filter(i => BASKET.has(bkey(D.id, i)));
+    if (sel.length) traces.push(mk(sel, "선택됨", {size: sz + 7, color: "rgba(0,0,0,0)", opacity: 1, line: {width: 2, color: cssv("--ink")}}));
+    L.dragmode = b.dragmode || "zoom";
+  } else if (b.kind === "bar" && b.y) {
+    const top = idxs.filter(i => isNum(ty(rows[i][b.y]))).slice(0, b.top || 20), hz = b.horizontal !== false;
+    const xs = top.map(i => String(rows[i][b.x])), ys = top.map(i => ty(rows[i][b.y]));
+    const colors = ccol ? top.map((i, k) => colorOf(b, rows[i][b.color], k)) : top.map(i => BASKET.has(bkey(D.id, i)) ? cssv("--c2") : cssv("--acc"));
+    traces.push({type: "bar", orientation: hz ? "h" : "v", x: hz ? ys : xs, y: hz ? xs : ys, customdata: top, text: top.map(hov), textposition: "none", hovertemplate: "%{text}<br>%{" + (hz ? "x" : "y") + "}<extra></extra>", marker: {color: colors}});
+    if (hz) { L.yaxis.autorange = "reversed"; L.yaxis.title = {text: ""}; L.xaxis.title = {text: b.y_label || axisTitle(b.y, b.y_transform)}; L.margin.l = 10; }
+  } else if (b.kind === "bar") {
+    const g = new Map(); idxs.forEach(i => tokens(rows[i][b.x], (D.columns.find(c => c.key === b.x) || {}).sep).forEach(v => {
+      const s = ccol ? String(rows[i][b.color]) : ""; if (!g.has(s)) g.set(s, new Map()); const m = g.get(s); m.set(v, (m.get(v) || 0) + 1); }));
+    const cats = Array.from(new Set(Array.from(g.values()).flatMap(m => Array.from(m.keys())))).sort((x, y) => cmpVals(x, y));
+    Array.from(g.keys()).sort((x, y) => cmpVals(x, y)).forEach((s, k) => traces.push({type: "bar", name: s, x: cats, y: cats.map(c => g.get(s).get(c) || 0), marker: {color: ccol ? colorOf(b, s, k) : cssv("--acc")}}));
+    L.barmode = "stack"; L.yaxis.title = {text: b.y_label || "행 수"};
+  } else if (b.kind === "histogram") {
+    const g = new Map(); idxs.forEach(i => { const v = tx(rows[i][b.x]); if (!isNum(v)) return; const s = ccol ? String(rows[i][b.color]) : ""; if (!g.has(s)) g.set(s, []); g.get(s).push(v); });
+    Array.from(g.keys()).sort((x, y) => cmpVals(x, y)).forEach((s, k) => traces.push({type: "histogram", name: s, x: g.get(s), nbinsx: b.bins || 40, opacity: g.size > 1 ? .6 : 1, marker: {color: ccol ? colorOf(b, s, k) : cssv("--acc")}}));
+    L.barmode = "overlay"; L.yaxis.title = {text: b.y_label || "행 수"};
+  } else if (b.kind === "box") {
+    const g = new Map(); idxs.forEach(i => { const v = ty(rows[i][b.y]); if (!isNum(v)) return; const s = b.x ? String(rows[i][b.x]) : ""; if (!g.has(s)) g.set(s, []); g.get(s).push(i); });
+    Array.from(g.keys()).sort((x, y) => cmpVals(x, y)).forEach((s, k) => traces.push({type: "box", name: s, y: g.get(s).map(i => ty(rows[i][b.y])), customdata: g.get(s), text: g.get(s).map(hov), boxpoints: "all", jitter: .4, pointpos: 0,
+      hovertemplate: "%{text}<br>%{y}<extra></extra>", marker: {color: colorOf(b, s, k), size: 4}}));
+    L.showlegend = false;
+  }
+  if (b.title_in_plot) L.title = {text: b.title_in_plot, x: 0, font: {size: 13}};
+  return {traces, layout: Object.assign(L, b.layout || {}), n: idxs.length};
+}
+function drawChart(C) {
+  if (!window.Plotly) { C.el.innerHTML = '<div class="nolib">그래프 라이브러리(plotly)를 불러오지 못했습니다. 인터넷 연결을 확인하세요. 표와 필터는 그대로 쓸 수 있습니다.</div>'; C.drawn = true; return; }
+  const cfg = {displaylogo: false, responsive: true, modeBarButtonsToRemove: ["sendDataToCloud", "toImage"]};
+  if (C.b.data) Plotly.react(C.el, C.b.data, Object.assign(themeLayout(C.b), C.b.layout || {}), cfg);
+  else { const o = buildChart(C); Plotly.react(C.el, o.traces, o.layout, cfg); if (C.help) C.help.textContent = C.helpText + " · 표 필터 결과 " + o.n.toLocaleString() + "행 기준"; }
+  if (!C.drawn && !C.b.data) {
+    const tid = C.b.table, ts = TABLE_VIEWS[tid];
+    // link to the first table block showing this table (attached at first draw, so block order does not matter)
+    if (ts && ts[0]) ts[0].listeners.push(() => { if (C.drawn) schedule(C); });
+    // count bars and histograms carry no customdata, so only row-backed marks toggle the basket
+    C.el.on("plotly_click", ev => { const p = ev.points && ev.points[0]; if (p && p.customdata != null) setBasket(tid, [p.customdata]); });
+    C.el.on("plotly_selected", ev => { if (!ev || !ev.points) return; const ids = ev.points.map(p => p.customdata).filter(v => v != null); if (ids.length) { setBasket(tid, ids, true); toast(ids.length.toLocaleString() + "개를 바구니에 담았습니다"); } });
+  }
+  C.drawn = true;
+}
+function schedule(C) { clearTimeout(C.tmr); C.tmr = setTimeout(() => { if (isShown(C.el)) drawChart(C); else C.dirty = true; }, 150); }
+function isShown(el) { return el.offsetParent !== null && !el.closest("details:not([open])"); }
+function makeChart(host, b) {
+  const el = document.createElement("div"); el.className = "chart"; el.style.height = (b.height || 420) + "px"; host.appendChild(el);
+  const C = {b, el, drawn: false};
+  if (!b.data) {
+    const help = document.createElement("div"); help.className = "chart-help"; host.appendChild(help); C.help = help;
+    C.helpText = b.kind === "scatter" ? "점을 누르면 바구니에 담기 · 툴바의 올가미/상자 선택으로 여러 개 담기" : b.kind === "bar" && b.y ? "표의 정렬·필터 순서대로 위 " + (b.top || 20) + "개 · 막대를 누르면 바구니에 담기" : "표 필터에 따라 다시 그려집니다";
+    help.textContent = C.helpText;
+  }
+  CHARTS.push(C);
+}
+function drawVisible() { CHARTS.forEach(C => { if (isShown(C.el) && (!C.drawn || C.dirty)) { C.dirty = false; drawChart(C); } else if (C.drawn && isShown(C.el) && window.Plotly) Plotly.Plots.resize(C.el); }); }
+function redrawAll() { CHARTS.forEach(C => { if (C.drawn) { if (isShown(C.el)) drawChart(C); else C.dirty = true; } }); }
+
+/* ---------- review form -> markdown ---------- */
+function makeReview(host, b) {
+  const SK = "review:" + b.id;
+  const def = () => { const s = {}; b.items.forEach(it => { s[it.id] = {}; (it.fields || []).forEach(f => { if (f.def != null) s[it.id][f.id] = f.def; }); }); return s; };
+  let st = Object.assign(def(), store.get(SK, {}));
+  b.items.forEach(it => { st[it.id] = Object.assign({}, def()[it.id], st[it.id] || {}); });
+  const wrap = document.createElement("div"); host.appendChild(wrap);
+  const fieldHTML = (it, f) => {
+    const id = "rv-" + b.id + "-" + it.id + "-" + f.id, v = st[it.id][f.id], nm = esc(id);
+    let h = '<div class="rv-f"><div class="lab">' + esc(f.label || f.id) + "</div><div>";
+    if (f.type === "choice" || f.type === "multi") {
+      const multi = f.type === "multi";
+      h += '<div class="rv-opts" role="' + (multi ? "group" : "radiogroup") + '" aria-label="' + esc(f.label || f.id) + '">' + (f.options || []).map((o, k) => {
+        const on = multi ? Array.isArray(v) && v.includes(o.v) : v === o.v;
+        return '<label><input type="' + (multi ? "checkbox" : "radio") + '" name="' + nm + '" id="' + nm + "-" + k + '" value="' + esc(o.v) + '" data-it="' + esc(it.id) + '" data-f="' + esc(f.id) + '"' + (on ? " checked" : "") + "><span>" + esc(o.l || o.v) +
+          (o.rec ? '<span class="badge rec">권고</span>' : "") + (o.warn ? '<span class="badge warn">주의</span>' : "") +
+          (o.d ? '<span class="od">' + esc(o.d) + "</span>" : "") + (o.r ? '<span class="od ref">근거: ' + esc(o.r) + "</span>" : "") + "</span></label>";
+      }).join("") + "</div>";
+    } else if (f.type === "textarea") h += '<textarea id="' + nm + '" data-it="' + esc(it.id) + '" data-f="' + esc(f.id) + '" placeholder="' + esc(f.placeholder || "") + '">' + esc(v || "") + "</textarea>";
+    else h += '<input id="' + nm + '" type="' + (f.type === "number" ? "number" : "text") + '" data-it="' + esc(it.id) + '" data-f="' + esc(f.id) + '" value="' + esc(v == null ? "" : v) + '" placeholder="' + esc(f.placeholder || "") + '">';
+    return h + "</div></div>";
+  };
+  wrap.innerHTML = b.items.map(it => '<div class="rv-item"><h4>' + esc(it.title || it.id) + "</h4>" + (it.desc ? '<div class="desc">' + it.desc + "</div>" : "") + (it.fields || []).map(f => fieldHTML(it, f)).join("") + "</div>").join("") +
+    '<div class="rv-out"><div class="rv-actions"><button class="btn pri" type="button" data-a="gen">Markdown 생성</button><button class="btn" type="button" data-a="copy">복사</button><button class="btn" type="button" data-a="save">.md 저장</button>' +
+    '<label><input type="checkbox" data-o="basket"' + (b.include_basket === false ? "" : " checked") + "> 선택 바구니 포함</label>" +
+    '<label><input type="checkbox" data-o="answered"> 답한 항목만</label><button class="btn" type="button" data-a="reset">선택 초기화</button><span class="rv-status"></span></div>' +
+    '<textarea readonly aria-label="생성된 Markdown" placeholder="‘Markdown 생성’을 누르면 여기에 결과가 나옵니다. 다음 단계 요청에 그대로 붙여 넣으세요."></textarea></div>';
+  const status = $(".rv-status", wrap), out = $(".rv-out textarea", wrap);
+  let tmr = null;
+  const save = () => { clearTimeout(tmr); tmr = setTimeout(() => { store.set(SK, st); status.textContent = "자동 저장됨 " + new Date().toLocaleTimeString(); }, 300); };
+  wrap.addEventListener("input", e => {
+    const el = e.target, it = el.dataset.it, f = el.dataset.f; if (!it || !f) return;
+    if (el.type === "checkbox") { const cur = new Set(st[it][f] || []); el.checked ? cur.add(el.value) : cur.delete(el.value); st[it][f] = Array.from(cur); }
+    else if (el.type === "radio") st[it][f] = el.value;
+    else st[it][f] = el.type === "number" ? (el.value === "" ? null : +el.value) : el.value;
+    save();
+  });
+  const md = () => {
+    const onlyAns = $('input[data-o="answered"]', wrap).checked, withB = $('input[data-o="basket"]', wrap).checked;
+    const L = ["# " + (b.md_title || (M.title || "보고서") + " — 검토 결과"), "", "- 보고서: " + (M.title || "") + (M.date ? " (" + M.date + ")" : ""), "- 작성일: " + today()];
+    if (b.md_intro) L.push("", b.md_intro);
+    b.items.forEach(it => {
+      const lines = [];
+      (it.fields || []).forEach(f => {
+        const v = st[it.id][f.id], empty = v == null || v === "" || (Array.isArray(v) && !v.length);
+        if (empty) { if (!onlyAns) lines.push("- **" + (f.label || f.id) + "**: (미정)"); return; }
+        if (f.type === "choice" || f.type === "multi") {
+          const opts = (f.options || []).filter(o => Array.isArray(v) ? v.includes(o.v) : o.v === v);
+          if (f.type === "choice" && opts.length === 1) { const o = opts[0]; lines.push("- **" + (f.label || f.id) + "**: " + (o.l || o.v) + (o.d ? " — " + o.d : "") + (o.r ? " _(근거: " + o.r + ")_" : "") + (o.warn ? " ⚠ 주의 옵션" : "")); }
+          else { lines.push("- **" + (f.label || f.id) + "**:"); opts.forEach(o => lines.push("  - " + (o.l || o.v) + (o.d ? " — " + o.d : "") + (o.r ? " _(근거: " + o.r + ")_" : ""))); }
+        } else if (f.type === "textarea") { lines.push("- **" + (f.label || f.id) + "**:"); String(v).split(/\r?\n/).forEach(t => lines.push("  > " + t)); }
+        else lines.push("- **" + (f.label || f.id) + "**: " + v);
+      });
+      if (lines.length || !onlyAns) { L.push("", "## " + (it.title || it.id)); if (it.md_desc) L.push("", it.md_desc); L.push(""); L.push.apply(L, lines.length ? lines : ["- (응답 없음)"]); }
+    });
+    if (withB && BASKET.size) {
+      L.push("", "## 관심 항목 (선택 바구니 " + BASKET.size + "행)");
+      basketGroups().forEach((idxs, tid) => {
+        const D = R.tables[tid], keys = b.basket_cols && b.basket_cols[tid] || D.columns.slice(0, 8).map(c => c.key), cl = v => v == null ? "" : String(v).replace(/\|/g, "／").replace(/[\r\n]+/g, " ");
+        L.push("", "### " + (D.title || tid) + " (" + idxs.length + "행)", "", "| " + keys.join(" | ") + " |", "|" + keys.map(() => "---").join("|") + "|");
+        idxs.forEach(i => L.push("| " + keys.map(k => cl(D.rows[i][k])).join(" | ") + " |"));
+      });
+    }
+    return L.join("\n") + "\n";
+  };
+  wrap.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-a]"); if (!btn) return; const a = btn.dataset.a;
+    if (a === "gen") { out.value = md(); flash(btn, "생성됨"); }
+    else if (a === "copy") { if (!out.value) out.value = md(); copyText(out.value, btn); }
+    else if (a === "save") { if (!out.value) out.value = md(); saveFile(fileStem() + "_" + b.id + ".md", out.value, btn); }
+    else if (a === "reset") {
+      if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; flash(btn, "한 번 더 누르면 초기화"); setTimeout(() => { btn.dataset.armed = ""; }, 1500); return; }
+      st = def(); store.set(SK, st); const host2 = wrap.parentNode; wrap.remove(); makeReview(host2, b);
+    }
+  });
+}
+
+/* ---------- simple blocks ---------- */
+function addTitle(el, b) {
+  if (b.title) { const h = document.createElement(b.level === 2 ? "h2" : "h3"); h.textContent = b.title; el.appendChild(h); }
+  if (b.intro) { const p = document.createElement("div"); p.className = "intro prose"; p.innerHTML = b.intro; el.appendChild(p); }
+}
+const RENDER = {
+  html: (b, el) => { el.classList.add("prose"); el.insertAdjacentHTML("beforeend", b.html); },
+  cards: (b, el) => { el.insertAdjacentHTML("beforeend", '<div class="cards">' + b.items.map(c => '<div class="card' + (c.tone ? " t-" + esc(c.tone) : "") + '"><b>' + esc(c.value) + "</b><span>" + esc(c.label) + "</span>" + (c.note ? "<small>" + esc(c.note) + "</small>" : "") + "</div>").join("") + "</div>"); },
+  callout: (b, el) => { el.insertAdjacentHTML("beforeend", '<div class="callout prose' + (b.tone ? " t-" + esc(b.tone) : "") + '">' + (b.title ? "<b>" + esc(b.title) + "</b>" : "") + (b.html || "") + "</div>"); },
+  kv: (b, el) => { el.insertAdjacentHTML("beforeend", '<table class="kv"><tbody>' + b.rows.map(r => "<tr><th>" + esc(r[0]) + "</th><td>" + (b.code ? "<code>" + esc(r[1]) + "</code>" : esc(r[1])) + (r[2] ? ' <span class="sub">' + esc(r[2]) + "</span>" : "") + "</td></tr>").join("") + "</tbody></table>"); },
+  glossary: (b, el) => { el.insertAdjacentHTML("beforeend", '<dl class="gl">' + b.items.map(t => "<dt>" + esc(t[0]) + "</dt><dd>" + esc(t[1]) + "</dd>").join("") + "</dl>"); },
+  figure: (b, el) => { const w = b.min_width || (b.images.length > 1 ? 320 : 600); el.insertAdjacentHTML("beforeend", '<div class="figs" style="grid-template-columns:repeat(auto-fit,minmax(min(' + (+w) + 'px,100%),1fr))">' + b.images.map(im => '<figure><img src="' + esc(im.src) + '" alt="' + esc(im.alt || im.caption || "") + '" loading="lazy"' + (im.width ? ' style="width:' + (+im.width) + 'px"' : "") + ">" + (im.caption ? "<figcaption>" + esc(im.caption) + "</figcaption>" : "") + "</figure>").join("") + "</div>" + (b.caption ? '<div class="sub">' + esc(b.caption) + "</div>" : "")); },
+  table: (b, el) => makeTable(el, b),
+  chart: (b, el) => makeChart(el, b),
+  review: (b, el) => makeReview(el, b),
+  details: (b, el) => {
+    const d = document.createElement("details"); d.className = "dt"; if (b.open) d.open = true;
+    const s = document.createElement("summary"); s.textContent = b.summary || b.title || "자세히"; d.appendChild(s);
+    const body = document.createElement("div"); d.appendChild(body); el.appendChild(d); renderBlocks(b.blocks || [], body);
+    d.addEventListener("toggle", () => { if (d.open) drawVisible(); });
+  }
+};
+function renderBlocks(blocks, host) {
+  blocks.forEach(b => {
+    const el = document.createElement("div"); el.className = "blk blk-" + b.type; host.appendChild(el);
+    if (b.type !== "callout" && b.type !== "details") addTitle(el, b);
+    (RENDER[b.type] || ((x, e) => { e.textContent = "알 수 없는 블록: " + x.type; }))(b, el);
+  });
+}
+
+/* ---------- shell, tabs ---------- */
+function show(id, user) {
+  $$("section.tab").forEach(s => { s.hidden = s.dataset.id !== id; });
+  $$("#ir-nav button").forEach(bt => { if (bt.dataset.t === id) bt.setAttribute("aria-current", "page"); else bt.removeAttribute("aria-current"); });
+  try { history.replaceState(null, "", "#" + id); } catch (e) { /* sandboxed */ }
+  if (user) window.scrollTo(0, 0);
+  drawVisible();
+}
+function init() {
+  document.title = M.title || document.title;
+  $("#ir-title").textContent = M.title || "보고서";
+  $("#ir-sub").textContent = [M.subtitle, M.date, M.author, M.source].filter(Boolean).join(" · ");
+  const nav = $("#ir-nav"), main = $("#ir-main");
+  R.tabs.forEach(t => {
+    const bt = document.createElement("button"); bt.type = "button"; bt.dataset.t = t.id; bt.textContent = t.title; bt.addEventListener("click", () => show(t.id, true)); nav.appendChild(bt);
+    const sec = document.createElement("section"); sec.className = "tab"; sec.dataset.id = t.id; sec.id = "sec-" + t.id; sec.hidden = true; sec.setAttribute("aria-label", t.title); main.appendChild(sec);
+  });
+  initBasket();
+  R.tabs.forEach(t => renderBlocks(t.blocks, $("#sec-" + t.id)));
+  renderBasket();
+  const h = decodeURIComponent((location.hash || "").slice(1));
+  show(R.tabs.some(t => t.id === h) ? h : R.tabs[0].id, false);
+  $("#ir-main").addEventListener("click", e => { const im = e.target.closest("figure img"); if (im) { const lb = $("#ir-lb"); $("img", lb).src = im.src; lb.hidden = false; } });
+  $("#ir-lb").addEventListener("click", () => { $("#ir-lb").hidden = true; });
+  $("#ir-dlg").addEventListener("click", e => { const a = e.target.closest("button[data-a]"); if (e.target.id === "ir-dlg" || (a && a.dataset.a === "close")) $("#ir-dlg").hidden = true; else if (a) $("#ir-dlg textarea").select(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { $("#ir-lb").hidden = true; $("#ir-dlg").hidden = true; } });
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawAll); } catch (e) { /* old browser */ }
+  new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+  window.addEventListener("hashchange", () => { const k = decodeURIComponent(location.hash.slice(1)); if (R.tabs.some(t => t.id === k)) show(k, false); });
+}
+init();
+})();
+</script>

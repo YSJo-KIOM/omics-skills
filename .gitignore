@@ -1,0 +1,6 @@
+# local-only: PC inventory has machine paths and security findings
+inventory/
+dist/
+__pycache__/
+*.pyc
+.DS_Store

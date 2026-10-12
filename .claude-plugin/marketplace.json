@@ -1,0 +1,12 @@
+{
+  "name": "omics-skills",
+  "owner": {"name": "YSJo-KIOM"},
+  "metadata": {"description": "ysjo 개인 오믹스 분석 스킬 모음"},
+  "plugins": [
+    {
+      "name": "omics-skills",
+      "source": "./plugins/omics-skills",
+      "description": "오믹스 분석 결과·문헌 정리용 스킬 (interactive-report 등)"
+    }
+  ]
+}

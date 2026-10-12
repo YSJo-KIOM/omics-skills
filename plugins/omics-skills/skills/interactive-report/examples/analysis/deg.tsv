@@ -1,0 +1,401 @@
+gene	baseMean	log2FC	pvalue	padj	direction	pathways	note
+GENE029	135.8	-3.974	1.88e-09	7.53e-07	down	inflammation	
+GENE015	317.0	3.266	3.77e-09	7.53e-07	up		
+GENE028	329.7	-3.515	1.23e-08	1.63e-06	down		
+GENE018	164.7	3.883	1.7e-08	1.7e-06	up	barrier;stress	
+GENE055	32.1	-3.323	2.69e-08	2.15e-06	down	barrier	
+GENE270	2553.4	2.775	7.18e-08	4.16e-06	up	barrier;cell_cycle	
+GENE021	203.3	-2.842	7.57e-08	4.16e-06	down		
+GENE024	124.1	-3.374	8.31e-08	4.16e-06	down	cell_cycle;inflammation	
+GENE030	94.9	2.618	3.16e-07	1.33e-05	up	inflammation;metabolism	
+GENE009	12.7	2.554	3.42e-07	1.33e-05	up	cell_cycle	
+GENE172	124.3	2.745	3.67e-07	1.33e-05	up	metabolism	
+GENE170	81.2	-2.771	4.4e-07	1.47e-05	down	metabolism;stress	
+GENE023	141.8	3.983	6e-07	1.85e-05	up	inflammation;stress	
+GENE036	56.1	-2.788	1.72e-06	4.9e-05	down	stress	
+GENE027	3199.6	3.091	1.91e-06	5.01e-05	up	metabolism	
+GENE008	27.4	2.22	2e-06	5.01e-05	up	cell_cycle	
+GENE006	817.9	3.443	4.21e-06	9.9e-05	up		
+GENE011	472.5	2.685	5.83e-06	0.000129	up	inflammation	
+GENE214	5.8	3.342	8.58e-06	0.000181	up	inflammation	
+GENE004	241.7	-2.852	9.13e-06	0.000183	down	cell_cycle	
+GENE012	862.0	3.718	1.14e-05	0.000217	up	stress	
+GENE113	7263.4	2.198	1.2e-05	0.000218	up		
+GENE371	27.7	2.021	1.49e-05	0.000259	up	barrier	
+GENE322	322.7	-2.341	1.95e-05	0.000324	down	cell_cycle;stress	
+GENE245	1068.1	2.084	2.16e-05	0.000345	up		
+GENE073	13.3	-1.677	4.88e-05	0.00075	down		
+GENE129	45.2	1.842	5.25e-05	0.000777	up		
+GENE352	165.3	-1.774	5.98e-05	0.000854	down	stress	
+GENE003	543.8	-2.943	6.33e-05	0.000869	down	stress	합성 예시 유전자. 실제 생물학적 의미 없음; 긴 설명 열이 표에서 어떻게 접히는지 보여 주기 위한 문장입니다.
+GENE005	13.9	-2.431	6.52e-05	0.000869	down		
+GENE345	191.5	-1.731	7.4e-05	0.000955	down		
+GENE026	98.3	-3.24	0.000172	0.00215	down	inflammation	
+GENE109	635.9	1.831	0.00018	0.00218	up		
+GENE154	700.5	-1.737	0.000215	0.00251	down	barrier;inflammation	
+GENE366	41.8	1.903	0.000226	0.00251	up	inflammation	
+GENE363	304.8	-1.446	0.000226	0.00251	down	metabolism	
+GENE019	137.1	2.495	0.000284	0.00298	up	inflammation	
+GENE327	10.5	-1.429	0.000289	0.00298	down		
+GENE276	12.0	-2.399	0.00029	0.00298	down	inflammation	
+GENE381	35.5	2.078	0.000321	0.00316	up	barrier;stress	
+GENE317	78.5	1.584	0.000328	0.00316	up	barrier;inflammation	
+GENE156	33.9	2.739	0.000332	0.00316	up	cell_cycle	
+GENE365	1877.5	-1.42	0.000367	0.00336	down	metabolism	
+GENE260	149.1	1.422	0.00037	0.00336	up	inflammation	
+GENE396	62.2	-1.957	0.000468	0.00416	down	cell_cycle	
+GENE128	17.9	-1.818	0.000536	0.00456	down	cell_cycle	
+GENE054	1027.7	-1.684	0.000536	0.00456	down	stress	
+GENE160	38.5	-1.488	0.000569	0.00474	down	cell_cycle	
+GENE025	11.3	1.867	0.000635	0.00518	up	stress	
+GENE010	142.3	2.35	0.000725	0.0058	up	cell_cycle;metabolism	
+GENE013	51.1	-3.421	0.000807	0.00621	down		
+GENE037	63.3	1.388	0.000808	0.00621	up	metabolism	
+GENE395	159.6	1.904	0.00083	0.00626	up	barrier	
+GENE340	805.0	-1.225	0.000873	0.00641	down	cell_cycle;stress	
+GENE166	53.1	1.455	0.000899	0.00641	up		
+GENE325	184.1	-1.39	0.000908	0.00641	down	barrier	
+GENE142	384.0	2.797	0.000929	0.00641	up	metabolism	
+GENE045	58.6	-1.744	0.000929	0.00641	down	cell_cycle	
+GENE084	733.6	1.452	0.00106	0.00715	up	metabolism	
+GENE234	68.2	-1.695	0.00115	0.00766	down	metabolism	
+GENE200	121.9	1.86	0.00117	0.00767	up		
+GENE217	43.6	-1.201	0.0013	0.00841	down		
+GENE022	55.9	-3.035	0.00139	0.00871	down	stress	
+GENE001	102.8	-1.681	0.00139	0.00871	down		합성 예시 유전자. 실제 생물학적 의미 없음; 긴 설명 열이 표에서 어떻게 접히는지 보여 주기 위한 문장입니다.
+GENE174	100.1	-2.615	0.00153	0.00941	down	cell_cycle	
+GENE277	2516.5	1.384	0.00161	0.00973	up		
+GENE096	1128.4	1.734	0.00177	0.0105	up	cell_cycle;metabolism	
+GENE231	67.5	-1.767	0.00193	0.0114	down		
+GENE049	114.1	-1.317	0.00228	0.0132	down	barrier	
+GENE089	33.9	1.303	0.00243	0.0139	up	metabolism;stress	
+GENE115	924.2	1.7	0.00248	0.0139	up	barrier	
+GENE014	441.8	1.701	0.0025	0.0139	up	stress	
+GENE151	42.8	-1.048	0.00272	0.0149	down		
+GENE240	79.2	-1.438	0.00289	0.0156	down	barrier;metabolism	
+GENE039	430.0	1.073	0.00298	0.0159	up	inflammation;stress	
+GENE137	112.5	1.28	0.00301	0.0159	up	inflammation;stress	
+GENE278	124.9	-1.298	0.00336	0.0175	down	barrier;cell_cycle	
+GENE092	536.7	-1.11	0.00352	0.018	down	inflammation;metabolism	
+GENE350	132.5	-1.106	0.0037	0.0185	down	cell_cycle;stress	
+GENE346	1817.7	-1.048	0.00375	0.0185	down	metabolism	
+GENE184	922.8	1.678	0.00375	0.0185	up	metabolism	
+GENE380	92.2	0.999	0.00398	0.0194	ns	cell_cycle;stress	
+GENE002	48.3	-1.594	0.00408	0.0195	down	inflammation	합성 예시 유전자. 실제 생물학적 의미 없음; 긴 설명 열이 표에서 어떻게 접히는지 보여 주기 위한 문장입니다.
+GENE250	203.2	-1.03	0.00413	0.0195	down	cell_cycle;stress	
+GENE315	610.6	-1.942	0.0042	0.0195	down	barrier	
+GENE110	212.5	1.721	0.00424	0.0195	up	barrier	
+GENE387	271.5	1.637	0.00425	0.0195	up	cell_cycle;stress	
+GENE070	174.5	1.747	0.00475	0.0214	up	inflammation	
+GENE377	257.0	-0.961	0.00476	0.0214	ns	metabolism	
+GENE269	28.1	1.113	0.00489	0.0217	up	metabolism	
+GENE311	156.5	0.895	0.005	0.0219	ns	cell_cycle	
+GENE205	26.5	2.358	0.00504	0.0219	up		
+GENE126	7.2	-1.595	0.00519	0.0223	down		
+GENE390	70.9	-0.964	0.00535	0.0228	ns		
+GENE105	143.1	1.37	0.00555	0.0234	up	stress	
+GENE053	6.5	-0.933	0.0057	0.0238	ns	metabolism;stress	
+GENE215	286.3	1.943	0.0059	0.0242	up	cell_cycle;stress	
+GENE098	46.3	-1.058	0.00593	0.0242	down	cell_cycle;metabolism	
+GENE304	67.3	-1.267	0.00632	0.0255	down		
+GENE071	629.7	-2.537	0.00661	0.0262	down	cell_cycle	
+GENE334	659.5	-1.403	0.00667	0.0262	down		
+GENE251	39.1	-1.006	0.00668	0.0262	down		
+GENE281	14.0	-1.473	0.00728	0.0283	down	inflammation	
+GENE091	144.4	-1.072	0.00751	0.0289	down	cell_cycle;metabolism	
+GENE239	82.5	0.909	0.00766	0.0292	ns	barrier	
+GENE007	145.6	-1.705	0.00775	0.0292	down	cell_cycle;stress	
+GENE361	225.6	0.837	0.00802	0.03	ns	metabolism;stress	
+GENE086	508.3	2.824	0.00829	0.0305	up		
+GENE211	1283.7	-1.535	0.00832	0.0305	down	metabolism	
+GENE017	186.4	2.205	0.00863	0.0314	up	metabolism	
+GENE192	52.3	-1.408	0.00932	0.0336	down		
+GENE289	88.4	-1.002	0.00955	0.0341	down	stress	
+GENE344	51.6	1.086	0.0104	0.0367	up	inflammation	
+GENE332	1740.1	0.946	0.0106	0.037	ns	metabolism	
+GENE207	53.6	0.806	0.0106	0.037	ns	barrier;metabolism	
+GENE171	865.5	1.096	0.0109	0.0376	up	stress	
+GENE302	439.8	-1.001	0.011	0.0376	down	cell_cycle	
+GENE197	116.3	-1.006	0.0112	0.0377	down	inflammation	
+GENE309	391.2	-2.442	0.0112	0.0377	down		
+GENE061	449.1	0.791	0.0119	0.0397	ns	stress	
+GENE043	157.8	1.129	0.0124	0.0408	up		
+GENE293	132.1	1.0	0.0126	0.0412	up	inflammation;stress	
+GENE374	174.3	1.73	0.0133	0.0429	up	stress	
+GENE286	324.1	-1.29	0.0133	0.0429	down		
+GENE165	195.3	1.527	0.0135	0.0429	up	cell_cycle	
+GENE016	60.4	-1.877	0.0135	0.0429	down		
+GENE326	110.5	1.501	0.0137	0.0431	up		
+GENE051	25.9	1.974	0.0153	0.0479	up		
+GENE298	347.3	0.932	0.0156	0.0483	ns	barrier	
+GENE195	262.2	2.04	0.0159	0.049	up	metabolism;stress	
+GENE020	39.8	-1.668	0.0171	0.0522	ns	stress	
+GENE038	334.8	1.94	0.0173	0.0526	ns	cell_cycle	
+GENE337	91.1	0.98	0.0182	0.0549	ns		
+GENE373	218.1	-1.095	0.0184	0.055	ns	barrier	
+GENE203	3744.5	1.228	0.0197	0.0583	ns		
+GENE208	91.5	1.019	0.0213	0.0626	ns		
+GENE032	127.5	0.72	0.0223	0.065	ns		
+GENE169	103.6	-1.926	0.0229	0.0664	ns		
+GENE292	182.4	-1.04	0.0234	0.0672	ns	stress	
+GENE235	66.2	-0.855	0.0235	0.0672	ns	cell_cycle;stress	
+GENE194	287.6	0.783	0.0241	0.0682	ns		
+GENE125	67.8	-1.505	0.0242	0.0683	ns		
+GENE388	10.2	0.717	0.025	0.0694	ns	barrier	
+GENE181	79.1	0.911	0.025	0.0694	ns	metabolism	
+GENE324	3278.1	1.586	0.0254	0.07	ns	barrier	
+GENE247	66.2	1.512	0.0256	0.0703	ns		
+GENE306	146.9	0.985	0.0259	0.0704	ns	inflammation	
+GENE360	10.9	1.907	0.0279	0.0755	ns		
+GENE114	233.2	-0.621	0.0284	0.0758	ns	barrier	
+GENE120	47.1	0.638	0.0284	0.0758	ns	cell_cycle;stress	
+GENE130	748.4	-0.912	0.0298	0.079	ns		
+GENE274	232.4	-1.636	0.0303	0.0797	ns		
+GENE193	40.9	-1.074	0.0313	0.0815	ns	cell_cycle	
+GENE256	147.7	-0.744	0.0315	0.0815	ns		
+GENE397	280.4	0.667	0.0316	0.0815	ns	barrier;inflammation	
+GENE259	53.2	-1.824	0.0319	0.0819	ns	barrier	
+GENE399	4278.0	-1.695	0.0359	0.0905	ns		
+GENE135	974.7	0.93	0.0361	0.0905	ns	stress	
+GENE376	89.0	-0.628	0.0363	0.0905	ns	metabolism	
+GENE191	382.0	-1.493	0.0363	0.0905	ns		
+GENE139	266.6	0.976	0.0364	0.0905	ns	cell_cycle;metabolism	
+GENE206	6.4	-0.659	0.0395	0.0976	ns	cell_cycle	
+GENE238	1515.5	0.716	0.04	0.0979	ns		
+GENE339	37.5	-0.951	0.0401	0.0979	ns	cell_cycle	
+GENE123	31.2	-1.058	0.0409	0.0992	ns	cell_cycle	
+GENE103	25.1	1.178	0.0412	0.0992	ns	cell_cycle	
+GENE085	747.5	-1.464	0.0415	0.0995	ns	barrier;inflammation	
+GENE331	312.6	1.268	0.0445	0.106	ns		
+GENE118	107.1	0.769	0.0458	0.108	ns	barrier	
+GENE035	1.3	0.922	0.0486	0.114	ns	cell_cycle	
+GENE095	144.7	0.501	0.0522	0.122	ns	inflammation	
+GENE271	41.5	-0.667	0.0542	0.126	ns	cell_cycle	
+GENE143	43.8	1.229	0.0562	0.13	ns	inflammation	
+GENE079	18.6	0.925	0.0566	0.13	ns	stress	
+GENE088	1118.1	-0.557	0.0577	0.131	ns	cell_cycle;metabolism	
+GENE179	8.7	-1.493	0.0577	0.131	ns		
+GENE093	335.2	-1.575	0.059	0.133	ns		
+GENE147	293.2	1.676	0.0636	0.143	ns	barrier;metabolism	
+GENE226	72.5	-0.827	0.0638	0.143	ns	barrier;cell_cycle	
+GENE149	18.8	0.891	0.0642	0.143	ns	metabolism	
+GENE157	104.0	1.042	0.0645	0.143	ns	cell_cycle	
+GENE300	44.7	-1.359	0.07	0.154	ns		
+GENE335	24.6	1.705	0.0711	0.155	ns	inflammation	
+GENE220	137.7	0.613	0.0714	0.155	ns	barrier	
+GENE393	30.1	-0.555	0.0729	0.158	ns	barrier	
+GENE262	264.5	-0.534	0.0733	0.158	ns		
+GENE316	45.1	-0.686	0.0755	0.162	ns	metabolism	
+GENE163	383.7	-0.759	0.077	0.164	ns	stress	
+GENE058	46.9	1.6	0.0797	0.169	ns	barrier;cell_cycle	
+GENE357	156.2	0.825	0.0806	0.17	ns	metabolism	
+GENE132	25.6	-1.211	0.081	0.17	ns	barrier	
+GENE321	331.9	0.586	0.0828	0.173	ns	barrier;cell_cycle	
+GENE117	263.5	-0.513	0.0839	0.174	ns	cell_cycle	
+GENE041	74.1	-0.73	0.0845	0.174	ns	barrier	
+GENE313	197.6	0.678	0.085	0.174	ns	barrier;metabolism	
+GENE162	146.4	-0.829	0.0855	0.174	ns	metabolism;stress	
+GENE078	174.2	0.915	0.0857	0.174	ns	cell_cycle	
+GENE101	525.9	-1.203	0.0867	0.175	ns	barrier	
+GENE218	97.7	0.545	0.0891	0.179	ns		
+GENE255	73.1	0.42	0.0893	0.179	ns		
+GENE252	5.9	0.613	0.0905	0.18	ns	cell_cycle	
+GENE067	44.8	0.926	0.0923	0.183	ns		
+GENE059	37.2	-0.4	0.0933	0.184	ns	metabolism	
+GENE141	432.9	0.808	0.0957	0.188	ns		
+GENE303	38.6	-0.476	0.0999	0.194	ns	barrier;inflammation	
+GENE343	54.2	-0.419	0.1	0.194	ns	metabolism	
+GENE106	142.7	1.508	0.102	0.196	ns	inflammation	
+GENE312	241.6	-0.411	0.103	0.197	ns		
+GENE148	88.1	-0.714	0.103	0.197	ns	stress	
+GENE202	640.6	0.469	0.105	0.201	ns	barrier	
+GENE044	376.2	-0.642	0.107	0.203	ns		
+GENE383	292.3	0.448	0.108	0.203	ns	inflammation	
+GENE310	361.1	1.366	0.108	0.203	ns	metabolism	
+GENE119	147.0	0.396	0.11	0.205	ns	cell_cycle	
+GENE122	101.2	0.543	0.11	0.205	ns	metabolism	
+GENE364	30.1	-0.62	0.113	0.209	ns	barrier;cell_cycle	
+GENE097	44.0	-1.171	0.115	0.211	ns	barrier	
+GENE370	609.1	1.296	0.116	0.211	ns		
+GENE196	62.8	0.498	0.116	0.211	ns	metabolism	
+GENE237	443.6	-0.385	0.116	0.211	ns	cell_cycle;inflammation	
+GENE261	206.6	0.598	0.118	0.213	ns	cell_cycle	
+GENE385	399.4	-0.88	0.118	0.213	ns	inflammation	
+GENE282	84.7	0.426	0.119	0.213	ns	metabolism	
+GENE047	616.0	-0.773	0.12	0.214	ns		
+GENE244	63.3	-0.404	0.123	0.218	ns	stress	
+GENE168	4.0	0.634	0.125	0.221	ns	inflammation	
+GENE127	1025.7	1.298	0.126	0.221	ns	barrier;inflammation	
+GENE201	217.6	-1.228	0.127	0.222	ns	barrier;metabolism	
+GENE333	463.3	1.095	0.128	0.223	ns	cell_cycle	
+GENE090	1051.0	-1.04	0.129	0.224	ns		
+GENE268	40.5	-0.53	0.13	0.225	ns	barrier	
+GENE358	136.8	1.233	0.131	0.225	ns	stress	
+GENE219	198.0	-0.489	0.133	0.228	ns	metabolism;stress	
+GENE375	44.0	0.596	0.136	0.232	ns	metabolism;stress	
+GENE246	80.8	0.458	0.137	0.233	ns		
+GENE314	111.2	-0.802	0.14	0.238	ns		
+GENE368	48.4	-0.519	0.149	0.252	ns	inflammation	
+GENE379	34.6	0.313	0.154	0.26	ns		
+GENE062	1829.8	0.838	0.162	0.271	ns	inflammation	
+GENE042	894.0	-0.441	0.162	0.271	ns		
+GENE362	728.6	-0.884	0.165	0.273	ns	barrier	
+GENE265	544.8	-0.502	0.166	0.274	ns	inflammation	
+GENE241	93.2	-0.318	0.169	0.278	ns	barrier;cell_cycle	
+GENE216	14.2	0.608	0.171	0.279	ns	stress	
+GENE069	148.5	-0.629	0.171	0.279	ns		
+GENE158	4733.6	-0.311	0.172	0.279	ns	cell_cycle	
+GENE222	499.7	-0.319	0.178	0.287	ns	cell_cycle;metabolism	
+GENE372	271.3	-0.89	0.178	0.287	ns		
+GENE144	104.8	-0.383	0.179	0.287	ns	cell_cycle	
+GENE187	308.2	-0.618	0.18	0.288	ns	cell_cycle	
+GENE248	62.0	1.068	0.182	0.29	ns	inflammation	
+GENE068	48.6	0.977	0.185	0.294	ns	barrier	
+GENE351	1082.5	0.658	0.187	0.295	ns	barrier	
+GENE155	17.1	-0.387	0.191	0.301	ns	barrier	
+GENE134	25.0	-0.509	0.192	0.301	ns		
+GENE221	8.4	0.758	0.193	0.301	ns	metabolism	
+GENE347	293.4	0.87	0.194	0.303	ns	cell_cycle	
+GENE180	66.3	-0.487	0.196	0.305	ns		
+GENE121	60.0	0.847	0.198	0.305	ns	metabolism	
+GENE273	280.0	0.431	0.198	0.305	ns	barrier	
+GENE296	328.3	1.062	0.201	0.306	ns	barrier;cell_cycle	
+GENE369	297.2	1.03	0.201	0.306	ns	inflammation	
+GENE102	82.6	0.271	0.201	0.306	ns	barrier;metabolism	
+GENE263	747.5	-0.296	0.209	0.316	ns	barrier	
+GENE280	48.6	-0.36	0.21	0.316	ns	stress	
+GENE178	27.2	0.874	0.21	0.316	ns	metabolism	
+GENE209	12343.8	0.27	0.214	0.32	ns		
+GENE288	114.2	-0.56	0.216	0.322	ns	barrier;stress	
+GENE116	24.1	0.546	0.218	0.324	ns	barrier;cell_cycle	
+GENE072	613.2	0.406	0.22	0.326	ns		
+GENE257	1605.4	-0.295	0.225	0.332	ns	inflammation	
+GENE182	1106.2	-0.276	0.226	0.332	ns	cell_cycle	
+GENE258	79.8	-0.342	0.228	0.333	ns	inflammation	
+GENE189	141.6	0.714	0.228	0.333	ns		
+GENE112	41.5	0.385	0.231	0.336	ns	metabolism	
+GENE305	134.4	0.821	0.235	0.341	ns	inflammation	
+GENE353	9.5	-0.603	0.24	0.347	ns	cell_cycle	
+GENE290	162.3	0.563	0.244	0.351	ns		
+GENE183	49.8	0.578	0.247	0.354	ns	metabolism	
+GENE392	162.7	-0.917	0.248	0.354	ns	cell_cycle;metabolism	
+GENE111	61.7	-0.794	0.256	0.364	ns	barrier	
+GENE065	124.0	0.253	0.256	0.364	ns		
+GENE323	314.9	0.381	0.258	0.364	ns		
+GENE052	72.2	-0.735	0.261	0.367	ns		
+GENE210	339.8	0.594	0.261	0.367	ns	cell_cycle;inflammation	
+GENE389	1115.3	0.845	0.266	0.371	ns	stress	
+GENE349	11.8	-0.54	0.269	0.375	ns	inflammation	
+GENE230	4809.5	0.842	0.276	0.383	ns	cell_cycle;stress	
+GENE264	74.1	0.566	0.278	0.383	ns	stress	
+GENE066	664.9	-0.321	0.278	0.383	ns	inflammation	
+GENE164	2123.5	0.263	0.278	0.383	ns	inflammation	
+GENE213	32.2	-0.311	0.28	0.383	ns	stress	
+GENE348	26.0	-0.524	0.284	0.388	ns	barrier	
+GENE176	37.3	0.809	0.285	0.388	ns		
+GENE040	73.6	-0.475	0.286	0.388	ns	inflammation	
+GENE048	101.8	-0.308	0.29	0.392	ns		
+GENE212	38.7	-0.3	0.291	0.392	ns	barrier;metabolism	
+GENE229	1917.1	0.432	0.292	0.392	ns	barrier	
+GENE153	635.8	0.711	0.302	0.403	ns	inflammation	
+GENE283	1569.0	0.303	0.303	0.403	ns	stress	
+GENE299	253.4	0.762	0.303	0.403	ns	cell_cycle	
+GENE354	195.9	-0.379	0.305	0.404	ns	metabolism	
+GENE285	871.2	-0.269	0.308	0.407	ns	barrier	
+GENE046	336.4	0.293	0.31	0.407	ns	barrier	
+GENE279	1869.0	-0.346	0.31	0.407	ns	metabolism	
+GENE057	190.3	-0.735	0.311	0.407	ns	inflammation	
+GENE391	65.5	0.516	0.315	0.411	ns		
+GENE342	1258.1	0.375	0.325	0.422	ns		
+GENE328	1606.8	0.665	0.328	0.424	ns	barrier;inflammation	
+GENE140	514.3	0.212	0.339	0.438	ns	cell_cycle;stress	
+GENE355	1145.6	-0.621	0.348	0.447	ns	metabolism	
+GENE099	625.1	0.388	0.35	0.448	ns		
+GENE145	23.0	0.601	0.353	0.451	ns	barrier	
+GENE204	1702.0	0.436	0.356	0.453	ns	barrier	
+GENE056	88.7	0.267	0.361	0.459	ns	cell_cycle;inflammation	
+GENE034	452.5	-0.441	0.362	0.459	ns		
+GENE175	242.2	0.241	0.364	0.46	ns	barrier;cell_cycle	
+GENE232	24.9	0.392	0.369	0.464	ns	metabolism	
+GENE384	9.9	0.529	0.375	0.47	ns		
+GENE152	19.1	0.176	0.377	0.471	ns		
+GENE124	21.4	-0.162	0.388	0.483	ns	barrier;metabolism	
+GENE272	20.2	0.289	0.391	0.486	ns		
+GENE198	270.2	-0.575	0.397	0.492	ns		
+GENE294	12.1	-0.231	0.4	0.493	ns	inflammation;metabolism	
+GENE173	284.6	0.461	0.402	0.493	ns	barrier;inflammation	
+GENE177	797.3	0.377	0.402	0.493	ns	cell_cycle	
+GENE087	158.9	0.23	0.412	0.505	ns	inflammation	
+GENE336	905.3	-0.389	0.418	0.509	ns	metabolism;stress	
+GENE199	130.2	0.173	0.421	0.51	ns	cell_cycle	
+GENE108	8186.9	0.574	0.421	0.51	ns		
+GENE291	1310.7	0.349	0.425	0.513	ns	stress	
+GENE190	7.3	-0.151	0.426	0.513	ns	barrier;cell_cycle	
+GENE338	493.6	0.386	0.435	0.523	ns	inflammation;stress	
+GENE064	346.2	-0.453	0.437	0.523	ns		
+GENE138	610.9	0.176	0.452	0.538	ns	stress	
+GENE398	271.5	0.502	0.452	0.538	ns	stress	
+GENE267	56.6	0.354	0.459	0.545	ns	cell_cycle;metabolism	
+GENE080	149.7	-0.203	0.479	0.566	ns	metabolism	
+GENE224	14.8	0.167	0.48	0.566	ns	stress	
+GENE318	272.9	-0.251	0.49	0.576	ns		
+GENE249	1645.8	-0.225	0.516	0.605	ns	barrier	
+GENE094	16.0	-0.354	0.522	0.611	ns	barrier;inflammation	
+GENE228	1045.4	-0.171	0.525	0.611	ns	stress	
+GENE266	26.6	-0.272	0.525	0.611	ns	barrier;metabolism	
+GENE159	71.7	0.215	0.528	0.612	ns	cell_cycle;metabolism	
+GENE033	509.4	0.142	0.53	0.612	ns		
+GENE083	975.2	0.157	0.543	0.625	ns	barrier	
+GENE236	3.6	-0.126	0.544	0.625	ns	stress	
+GENE341	3073.7	-0.102	0.547	0.627	ns		
+GENE107	7.7	-0.194	0.553	0.632	ns	metabolism	
+GENE329	6634.4	-0.175	0.567	0.645	ns		
+GENE076	273.5	0.301	0.568	0.645	ns	stress	
+GENE146	86.5	-0.099	0.579	0.656	ns	cell_cycle	
+GENE320	336.2	-0.307	0.589	0.665	ns	stress	
+GENE104	550.3	-0.239	0.6	0.676	ns	barrier;inflammation	
+GENE242	462.7	-0.308	0.605	0.68	ns		
+GENE225	12.1	-0.086	0.62	0.694	ns	cell_cycle;inflammation	
+GENE359	58.0	-0.139	0.622	0.694	ns	stress	
+GENE275	316.9	-0.137	0.625	0.697	ns		
+GENE131	254.1	0.113	0.638	0.709	ns		
+GENE075	70.0	-0.212	0.643	0.713	ns	barrier;cell_cycle	
+GENE307	122.9	0.082	0.647	0.715	ns	stress	
+GENE308	603.1	-0.096	0.649	0.715	ns	barrier;inflammation	
+GENE400	21.9	-0.246	0.658	0.723	ns	stress	
+GENE185	8207.5	0.099	0.673	0.738	ns		
+GENE253	133.2	0.102	0.685	0.749	ns	barrier;inflammation	
+GENE301	531.1	0.167	0.694	0.757	ns	inflammation	
+GENE330	133.3	0.061	0.696	0.757	ns		
+GENE074	267.1	-0.07	0.719	0.779	ns	cell_cycle	
+GENE319	1316.5	0.067	0.727	0.786	ns	inflammation	
+GENE133	172.6	-0.17	0.734	0.788	ns	cell_cycle	
+GENE295	117.5	-0.117	0.735	0.788	ns		
+GENE186	244.6	0.162	0.735	0.788	ns	stress	
+GENE081	25.6	-0.11	0.745	0.797	ns		
+GENE287	100.1	0.045	0.767	0.818	ns	barrier	
+GENE063	344.7	-0.146	0.774	0.822	ns	metabolism	
+GENE031	3649.9	0.106	0.775	0.822	ns		
+GENE378	70.7	0.054	0.82	0.868	ns	inflammation	
+GENE394	295.6	-0.055	0.839	0.885	ns	metabolism	
+GENE050	36.4	-0.046	0.845	0.89	ns	cell_cycle	
+GENE077	30.3	0.045	0.852	0.895	ns		
+GENE136	317.5	0.061	0.855	0.895	ns	inflammation	
+GENE382	27.3	0.025	0.869	0.905	ns	stress	
+GENE243	21.6	-0.034	0.869	0.905	ns	stress	
+GENE100	48.8	0.03	0.871	0.905	ns		
+GENE356	739.7	-0.067	0.875	0.907	ns		
+GENE386	193.9	0.025	0.879	0.909	ns	metabolism	
+GENE227	20.6	0.031	0.883	0.91	ns	barrier	
+GENE297	89.4	0.029	0.898	0.923	ns	cell_cycle;inflammation	
+GENE167	200.1	0.019	0.903	0.926	ns		
+GENE284	225.4	-0.049	0.909	0.93	ns		
+GENE150	123.6	0.016	0.92	0.939	ns	inflammation;stress	
+GENE367	72.7	0.026	0.927	0.943	ns	barrier	
+GENE223	190.0	-0.015	0.936	0.951	ns	stress	
+GENE060	397.1	-0.031	0.95	0.962	ns	cell_cycle	
+GENE188	131.0	-0.017	0.966	0.975	ns	stress	
+GENE254	145.3	-0.014	0.967	0.975	ns	stress	
+GENE161	10.2	0.015	0.973	0.978	ns	cell_cycle	
+GENE233	311.7	-0.004	0.981	0.983	ns		
+GENE082	25.4	-0.003	0.995	0.995	ns		

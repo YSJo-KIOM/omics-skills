@@ -1,0 +1,373 @@
+{
+ "meta": {
+  "id": "example-analysis",
+  "title": "예시 · 처리군 vs 대조군 차등발현 보고서",
+  "subtitle": "합성 데이터로 만든 interactive-report 스킬 시연용 보고서",
+  "author": "interactive-report 예시"
+ },
+ "tables": {
+  "deg": {
+   "source": "deg.tsv",
+   "title": "차등발현 유전자",
+   "key": "gene",
+   "sort": "padj",
+   "columns": [
+    "gene",
+    {
+     "key": "log2FC",
+     "tone": "sign",
+     "dp": 2,
+     "tip": "처리군/대조군 log2 fold change"
+    },
+    {
+     "key": "padj",
+     "fmt": "sci",
+     "tip": "Benjamini–Hochberg 보정 p"
+    },
+    {
+     "key": "pvalue",
+     "fmt": "sci"
+    },
+    {
+     "key": "baseMean",
+     "dp": 1
+    },
+    {
+     "key": "direction",
+     "type": "cat",
+     "label": "방향",
+     "badges": {
+      "up": "up",
+      "down": "down"
+     }
+    },
+    {
+     "key": "pathways",
+     "type": "cat",
+     "sep": ";",
+     "label": "관련 경로"
+    },
+    {
+     "key": "note",
+     "label": "메모"
+    }
+   ]
+  },
+  "enrich": {
+   "source": "enrich.tsv",
+   "title": "기능 농축 결과",
+   "key": "term",
+   "sort": "padj",
+   "columns": [
+    {
+     "key": "term",
+     "label": "term",
+     "width": 260
+    },
+    "source",
+    {
+     "key": "direction",
+     "type": "cat",
+     "label": "방향",
+     "badges": {
+      "up": "up",
+      "down": "down"
+     }
+    },
+    {
+     "key": "padj",
+     "fmt": "sci"
+    },
+    {
+     "key": "n_genes",
+     "label": "유전자 수"
+    },
+    {
+     "key": "gene_ratio",
+     "fmt": "pct"
+    },
+    {
+     "key": "genes",
+     "label": "겹친 유전자",
+     "wrap": true
+    }
+   ]
+  }
+ },
+ "tabs": [
+  {
+   "id": "summary",
+   "title": "요약",
+   "role": "summary",
+   "blocks": [
+    {
+     "type": "callout",
+     "tone": "warn",
+     "title": "합성 데이터",
+     "text": "이 보고서의 숫자와 유전자 이름은 스킬 시연용으로 만든 것입니다. 생물학적 의미가 없습니다."
+    },
+    {
+     "type": "cards",
+     "items": [
+      {
+       "value": 400,
+       "label": "검정한 유전자"
+      },
+      {
+       "value": 119,
+       "label": "DEG (padj<0.05, |log2FC|≥1)"
+      },
+      {
+       "value": 58,
+       "label": "증가",
+       "tone": "up"
+      },
+      {
+       "value": 61,
+       "label": "감소",
+       "tone": "down"
+      },
+      {
+       "value": 28,
+       "label": "유의한 기능 term (padj<0.05)"
+      }
+     ]
+    },
+    "## 핵심 결과\n\n- 처리군에서 **58개 증가, 61개 감소** — 두 방향이 비슷하다.\n- 증가 유전자는 *inflammatory response*, *cytokine signaling* 계열에, 감소 유전자는 *epithelial barrier*, *tight junction* 계열에 모인다.\n- 상위 DEG 의 효과 크기는 |log2FC| 1.5–4 로 크다. 반복 실험에서 재현되는지 확인이 필요하다.\n\n## 판단이 필요한 것\n\n1. qPCR 검증 대상 — **다음 단계** 탭에서 고르고, 표에서 고른 유전자는 선택 바구니로 넘긴다.\n2. 해석의 중심 축 (염증 / 장벽 / 대사)",
+    {
+     "type": "figure",
+     "src": "workflow.svg",
+     "caption": "분석 흐름 (예시 그림)",
+     "min_width": 500
+    },
+    {
+     "type": "callout",
+     "tone": "tip",
+     "title": "이 보고서 쓰는 법",
+     "text": "- 표 머리를 누르면 정렬, 둘째 줄에서 열마다 거른다. 숫자 열은 슬라이더 또는 `>=1`, `<0.05`, `abs>=1` 같은 식.\n- 행을 누르면 오른쪽 아래 **선택 바구니**에 담긴다. 바구니는 TSV 로 복사·저장된다.\n- 그래프는 표 필터를 따라 다시 그려진다. 점을 누르거나 올가미로 고르면 바구니에 담긴다.\n- **다음 단계** 탭에서 방향을 고르고 Markdown 을 만들어 다음 요청에 붙여 넣는다."
+    }
+   ]
+  },
+  {
+   "id": "deg",
+   "title": "차등발현",
+   "blocks": [
+    {
+     "type": "md",
+     "text": "padj < 0.05 이고 |log2FC| ≥ 1 인 유전자를 DEG 로 본다. 아래 표의 필터를 바꾸면 volcano plot 이 따라 바뀐다."
+    },
+    {
+     "type": "chart",
+     "title": "Volcano plot",
+     "table": "deg",
+     "kind": "scatter",
+     "x": "log2FC",
+     "y": "padj",
+     "y_transform": "-log10",
+     "color": "direction",
+     "hover": [
+      "baseMean",
+      "pathways"
+     ],
+     "lines": {
+      "x": [
+       -1,
+       1
+      ],
+      "y": [
+       1.301
+      ]
+     },
+     "height": 460
+    },
+    {
+     "type": "table",
+     "table": "deg",
+     "intro": "방향 열 드롭다운으로 up/down 만 보거나, padj 열에 `<0.01` 을 넣어 보세요."
+    }
+   ]
+  },
+  {
+   "id": "function",
+   "title": "기능 분석",
+   "blocks": [
+    {
+     "type": "chart",
+     "title": "상위 term (표 정렬 순)",
+     "table": "enrich",
+     "kind": "bar",
+     "x": "term",
+     "y": "padj",
+     "y_transform": "-log10",
+     "color": "direction",
+     "top": 15,
+     "height": 480
+    },
+    {
+     "type": "table",
+     "table": "enrich"
+    },
+    {
+     "type": "details",
+     "summary": "출처별 term 수",
+     "blocks": [
+      {
+       "type": "chart",
+       "table": "enrich",
+       "kind": "bar",
+       "x": "source",
+       "color": "direction",
+       "height": 320
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "next",
+   "title": "다음 단계",
+   "blocks": [
+    {
+     "type": "md",
+     "text": "방향을 고른 뒤 **Markdown 생성**을 누르세요. 선택 바구니에 담은 행이 표로 함께 들어갑니다. 선택은 이 브라우저에 자동 저장됩니다."
+    },
+    {
+     "type": "review",
+     "id": "next-step",
+     "md_title": "예시 보고서 — 다음 단계 입력",
+     "items": [
+      {
+       "id": "validate",
+       "title": "qPCR 검증 대상",
+       "desc": "검증할 유전자를 어떻게 고를지 정합니다.",
+       "fields": [
+        {
+         "id": "how",
+         "label": "선정 방식",
+         "type": "choice",
+         "options": [
+          {
+           "v": "top10",
+           "l": "padj 상위 10개",
+           "d": "효과가 가장 확실한 것부터",
+           "rec": true
+          },
+          {
+           "v": "basket",
+           "l": "선택 바구니에 담은 유전자",
+           "d": "표·그래프에서 직접 고른 것"
+          },
+          {
+           "v": "pathway",
+           "l": "경로별 대표 유전자",
+           "d": "염증·장벽 경로에서 2개씩"
+          }
+         ]
+        },
+        {
+         "id": "n",
+         "label": "최대 개수",
+         "type": "number",
+         "def": 10
+        },
+        {
+         "id": "note",
+         "label": "메모",
+         "type": "textarea",
+         "placeholder": "예: 하우스키핑 유전자는 GAPDH 대신 ..."
+        }
+       ]
+      },
+      {
+       "id": "axis",
+       "title": "해석의 중심 축",
+       "fields": [
+        {
+         "id": "focus",
+         "label": "중심 축",
+         "type": "choice",
+         "options": [
+          {
+           "v": "inflammation",
+           "l": "염증 반응",
+           "d": "증가 DEG 다수가 속함",
+           "rec": true
+          },
+          {
+           "v": "barrier",
+           "l": "상피 장벽",
+           "d": "감소 DEG 가 모임"
+          },
+          {
+           "v": "metabolism",
+           "l": "에너지 대사",
+           "d": "근거가 약함",
+           "warn": true
+          }
+         ]
+        },
+        {
+         "id": "extra",
+         "label": "추가 분석",
+         "type": "multi",
+         "options": [
+          {
+           "v": "gsea",
+           "l": "GSEA 재실행 (전체 순위)"
+          },
+          {
+           "v": "tf",
+           "l": "전사인자 활성 (decoupleR)"
+          },
+          {
+           "v": "network",
+           "l": "PPI 네트워크"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "environment": {
+  "software": {
+   "R": "4.5.1 (예시 값)",
+   "DESeq2": "1.48.2 (예시 값)",
+   "clusterProfiler": "4.16.0 (예시 값)"
+  },
+  "parameters": {
+   "DEG 기준": "padj < 0.05 그리고 |log2FC| ≥ 1",
+   "다중검정 보정": "Benjamini–Hochberg",
+   "농축 분석": "ORA (hypergeometric)"
+  },
+  "data": [
+   {
+    "desc": "차등발현 결과",
+    "path": "examples/analysis/deg.tsv"
+   },
+   {
+    "desc": "기능 농축 결과",
+    "path": "examples/analysis/enrich.tsv"
+   }
+  ],
+  "reproduce": "python3 scripts/build_report.py examples/analysis/spec.json",
+  "notes": "- 합성 데이터라 결과 해석에 쓰면 안 된다.\n- 실제 보고서에서는 이 자리에 표본 수, 배치, 제외 표본, 알려진 한계를 적는다."
+ },
+ "glossary": [
+  [
+   "log2FC",
+   "처리군/대조군 발현 비의 log2. 1 이면 2배"
+  ],
+  [
+   "padj",
+   "다중검정 보정한 p 값 (BH FDR)"
+  ],
+  [
+   "ORA",
+   "over-representation analysis — DEG 목록이 특정 유전자 집합에 몰렸는지 검정"
+  ]
+ ]
+}
