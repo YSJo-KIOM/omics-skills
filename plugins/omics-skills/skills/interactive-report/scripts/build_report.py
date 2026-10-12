@@ -18,9 +18,12 @@ import math
 import mimetypes
 import pathlib
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 HERE = pathlib.Path(__file__).resolve().parent
 TEMPLATE = HERE.parent / "assets" / "report.html"
 PLOTLY = '<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>'
@@ -29,6 +32,7 @@ ID_LIKE = re.compile(r"(^|[_.\s])(id|cid|pmid|pmcid|entrez|entrezid|gene_?id|acc
 TONES = {"up", "down", "good", "warn", "acc", "mut"}
 CHART_KINDS = {"scatter", "bar", "histogram", "box"}
 FIELD_TYPES = {"choice", "multi", "text", "textarea", "number"}
+CONTROL_TYPES = {"range", "select", "toggle"}
 MAX_BYTES = 16 * 1024 * 1024
 
 
@@ -275,7 +279,7 @@ def embed_image(src, base):
 
 class Ctx:
     def __init__(self, spec, base):
-        self.spec, self.base, self.tables, self.n_inline = spec, base, {}, 0
+        self.spec, self.base, self.tables, self.n_inline, self.widgets = spec, base, {}, 0, {}
         self.cat_max = int(spec.get("cat_max", 12))
         for tid, t in (spec.get("tables") or {}).items():
             self.tables[_sid(tid)] = prepare_table(_sid(tid), t, base, self.cat_max)
@@ -396,10 +400,89 @@ def block(b, ctx, where):
             if k in b:
                 out[k] = b[k]
         return out
+    if typ == "widget":
+        return widget_block(b, ctx, where, common)
     if typ == "details":
         return {"type": "details", "summary": b.get("summary") or b.get("title", "자세히"), "open": bool(b.get("open")),
                 "blocks": [block(x, ctx, f"{where} > details[{k}]") for k, x in enumerate(b.get("blocks", []))]}
-    raise SpecError(f"{where}: 알 수 없는 블록 type '{typ}' (md, html, code, cards, callout, kv, glossary, figure, table, chart, review, details)")
+    raise SpecError(f"{where}: 알 수 없는 블록 type '{typ}' (md, html, code, cards, callout, kv, glossary, figure, table, chart, widget, review, details)")
+
+
+def widget_block(b, ctx, where, common):
+    """Parameter widget: controls -> page-side compute function (script) -> live cards/plots."""
+    wid = _sid(b.get("id") or "")
+    if not b.get("id"):
+        raise SpecError(f"{where}: widget 에는 id 가 필요합니다")
+    if wid in ctx.widgets:
+        raise SpecError(f"{where}: widget id '{wid}' 가 중복됩니다")
+    controls, ids = [], set()
+    for c in b.get("controls") or []:
+        c = dict(c)
+        t = c.setdefault("type", "range")
+        cid = c.get("id")
+        if not cid or cid in ids:
+            raise SpecError(f"{where}: control 마다 고유한 id 가 필요합니다 ({cid!r})")
+        ids.add(cid)
+        if t not in CONTROL_TYPES:
+            raise SpecError(f"{where}: control '{cid}' type 은 {sorted(CONTROL_TYPES)} 중 하나")
+        if t == "range":
+            lo, hi = c.get("min"), c.get("max")
+            if not all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in (lo, hi)) or lo >= hi:
+                raise SpecError(f"{where}: range '{cid}' 에는 min < max 인 숫자가 필요합니다")
+            if c.get("log") and lo <= 0:
+                raise SpecError(f"{where}: range '{cid}' 가 log 이면 min > 0 이어야 합니다")
+            c.setdefault("value", lo)
+            if not (isinstance(c["value"], (int, float)) and lo <= c["value"] <= hi):
+                raise SpecError(f"{where}: range '{cid}' value {c['value']!r} 가 [{lo}, {hi}] 밖입니다")
+        elif t == "select":
+            c["options"] = [o if isinstance(o, dict) else {"v": o, "l": str(o)} for o in c.get("options") or []]
+            if not c["options"]:
+                raise SpecError(f"{where}: select '{cid}' 의 options 가 비어 있습니다")
+            c.setdefault("value", c["options"][0]["v"])
+            if c["value"] not in [o["v"] for o in c["options"]]:
+                raise SpecError(f"{where}: select '{cid}' value {c['value']!r} 가 options 에 없습니다")
+        else:
+            c["value"] = bool(c.get("value", False))
+        controls.append(c)
+    if not controls:
+        raise SpecError(f"{where}: widget '{wid}' 의 controls 가 비어 있습니다")
+    if b.get("script_file"):
+        p = (ctx.base / b["script_file"]).resolve()
+        if not p.exists():
+            raise SpecError(f"{where}: script_file 이 없습니다 — {p}")
+        code = p.read_text(encoding="utf-8")
+    elif b.get("script"):
+        code = "\n".join(b["script"]) if isinstance(b["script"], list) else b["script"]
+    else:
+        raise SpecError(f"{where}: widget '{wid}' 에는 script 또는 script_file 이 필요합니다 (render(ctx) 함수의 본문)")
+    out = {**common, "type": "widget", "id": wid, "controls": controls}
+    if b.get("table"):
+        if not isinstance(b["table"], str):
+            raise SpecError(f"{where}: widget 의 table 은 tables 에 정의한 표 id 여야 합니다")
+        out["table"] = ctx.table_ref(b, where)
+    ctx.widgets[wid] = code
+    return out
+
+
+def widget_js(widgets):
+    """Each widget script becomes a plain function in an inline <script> (no eval: works under strict CSP)."""
+    js = "window.IR_WIDGETS={};\n" + "".join(
+        f"window.IR_WIDGETS[{json.dumps(k)}]=function(ctx){{\n{code}\n}};\n" for k, code in widgets.items())
+    js = re.sub(r"</(script)", r"<\\/\1", js, flags=re.I)
+    node = shutil.which("node")
+    if not node:
+        if widgets:
+            WARN.append("node 가 없어 위젯 스크립트 문법 검사를 건너뜁니다 — 브라우저에서 '위젯 오류' 표시를 확인하세요")
+        return js
+    for k, code in widgets.items():
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as f:
+            f.write("(function(ctx){\n" + code + "\n});\n")
+        r = subprocess.run([node, "--check", f.name], capture_output=True, text=True)
+        pathlib.Path(f.name).unlink()
+        if r.returncode != 0:
+            msg = "\n".join(l for l in r.stderr.splitlines() if l.strip() and not l.startswith("Node.js"))[:800]
+            raise SpecError(f"widget '{k}' 스크립트 문법 오류 (줄 번호는 스크립트 첫 줄을 2로 셈):\n{msg}")
+    return js
 
 
 def env_blocks(spec, spec_name, ctx):
@@ -469,12 +552,14 @@ def build(spec, base=".", spec_name="(dict)", artifact=False):
         tabs.append({"id": "env" if "env" not in ids else "env-info", "title": "분석 환경·기타", "role": "environment", "blocks": env})
     if len(tabs) > 10:
         WARN.append(f"탭이 {len(tabs)}개 — 8개 이하로 묶는 것을 권장합니다")
-    has_chart = any(b["type"] == "chart" for t in tabs for b in _walk(t["blocks"]))
-    data = {"meta": meta, "tabs": tabs, "tables": ctx.tables, "build": datetime.datetime.now().strftime("%Y%m%d%H%M%S")}
+    kinds = {b["type"] for t in tabs for b in _walk(t["blocks"])}
+    has_chart = bool(kinds & {"chart", "widget"})
+    data = {"meta": meta, "tabs": tabs, "tables": ctx.tables, "has_widgets": "widget" in kinds,
+            "build": datetime.datetime.now().strftime("%Y%m%d%H%M%S")}
     payload = json.dumps(data, ensure_ascii=False, allow_nan=False, separators=(",", ":")).replace("</", "<\\/")
     head, body = TEMPLATE.read_text(encoding="utf-8").split("<!--IR-BODY-->")
     head = head.replace("%%TITLE%%", html.escape(meta["title"])).replace("%%PLOTLY%%", PLOTLY if has_chart else "")
-    body = body.replace("%%DATA%%", payload)
+    body = body.replace("%%DATA%%", payload).replace("%%WIDGETS%%", widget_js(ctx.widgets))
     if artifact:
         page = head + body
     else:

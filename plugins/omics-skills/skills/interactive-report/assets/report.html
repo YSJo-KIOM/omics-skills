@@ -121,6 +121,23 @@ figcaption{font-size:12px;color:var(--mut);margin-top:4px}
 .chart{width:100%;min-height:260px;background:var(--card);border:1px solid var(--line);border-radius:8px}
 .chart-help{font-size:11.5px;color:var(--mut);margin:4px 2px 12px}
 .chart .nolib{padding:20px;color:var(--mut);font-size:13px}
+/* parameter widgets */
+.wg{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:16px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:8px 0 16px}
+.wg-side{display:grid;gap:12px;align-content:start}
+.wg-ctl{display:grid;gap:3px}
+.wg-ctl label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;color:var(--mut)}
+.wg-ctl label.chk{justify-content:flex-start;color:var(--ink);cursor:pointer}
+.wg-ctl output{font-family:var(--f-mono);color:var(--acc);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wg-ctl input[type=range]{width:100%;margin:0;accent-color:var(--acc)}
+.wg-ctl select{font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--edge);border-radius:4px;background:var(--card);color:var(--ink)}
+.wg-ctl small{font-size:11px;color:var(--mut);line-height:1.4}
+.wg-acts{display:flex;gap:6px;flex-wrap:wrap;padding-top:4px;border-top:1px dashed var(--line)}
+.wg-main{min-width:0;display:grid;gap:8px;align-content:start}
+.wg-main .cards{margin:0}
+.wg-plot{width:100%}
+.wg-note{font-size:13px}
+.wg-err{color:var(--warn);font-size:12px;font-family:var(--f-mono);white-space:pre-wrap;background:var(--warnbg);padding:6px 9px;border-radius:4px}
+@media (max-width:760px){.wg{grid-template-columns:minmax(0,1fr)}}
 /* review */
 .rv-item{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0}
 .rv-item>h4{margin:2px 0 4px;color:var(--ink);font-size:14px}
@@ -181,6 +198,7 @@ figcaption{font-size:12px;color:var(--mut);margin-top:4px}
 <div id="ir-dlg" hidden role="dialog" aria-modal="true" aria-labelledby="ir-dlg-t"><div class="dlg"><div id="ir-dlg-t"></div><textarea readonly aria-label="내용"></textarea><div class="acts"><button class="btn" type="button" data-a="sel">전체 선택</button><button class="btn pri" type="button" data-a="close">닫기</button></div></div></div>
 <div id="ir-toast" role="status" aria-live="polite"></div>
 <script type="application/json" id="ir-data">%%DATA%%</script>
+<script>%%WIDGETS%%</script>
 <script>
 (function () {
 "use strict";
@@ -544,8 +562,109 @@ function makeChart(host, b) {
   }
   CHARTS.push(C);
 }
-function drawVisible() { CHARTS.forEach(C => { if (isShown(C.el) && (!C.drawn || C.dirty)) { C.dirty = false; drawChart(C); } else if (C.drawn && isShown(C.el) && window.Plotly) Plotly.Plots.resize(C.el); }); }
-function redrawAll() { CHARTS.forEach(C => { if (C.drawn) { if (isShown(C.el)) drawChart(C); else C.dirty = true; } }); }
+function drawVisible() {
+  CHARTS.forEach(C => { if (isShown(C.el) && (!C.drawn || C.dirty)) { C.dirty = false; drawChart(C); } else if (C.drawn && isShown(C.el) && window.Plotly) Plotly.Plots.resize(C.el); });
+  WIDGETS.forEach(W => { if (isShown(W.el) && (!W.drawn || W.dirty)) drawWidget(W); else if (W.drawn && isShown(W.el) && window.Plotly) Object.values(W.pmap).forEach(d => Plotly.Plots.resize(d)); });
+}
+function redrawAll() {
+  CHARTS.forEach(C => { if (C.drawn) { if (isShown(C.el)) drawChart(C); else C.dirty = true; } });
+  WIDGETS.forEach(W => { if (W.drawn) { if (isShown(W.el)) drawWidget(W); else W.dirty = true; } });
+}
+
+/* ---------- parameter widgets: controls -> recompute in page -> live visualization ----------
+   The per-widget compute function comes from window.IR_WIDGETS[id] (spec script / script_file) and receives ctx. */
+const WFN = window.IR_WIDGETS || {};
+const WIDGETS = [];
+function ctlText(c, v) {
+  if (c.type === "toggle") return v ? "켬" : "끔";
+  if (c.type === "select") { const o = c.options.find(o => o.v === v); return o ? String(o.l == null ? o.v : o.l) : String(v); }
+  return fmtNum(v, c) + (c.unit ? " " + c.unit : "");
+}
+function makeWidget(host, b) {
+  const SK = "widget:" + b.id, defs = {}, saved = store.get(SK, {}), v = {};
+  b.controls.forEach(c => {
+    defs[c.id] = c.value; const s = saved[c.id];
+    v[c.id] = c.type === "range" ? (isNum(s) && s >= c.min && s <= c.max ? s : c.value) : c.type === "select" ? (c.options.some(o => o.v === s) ? s : c.value) : (typeof s === "boolean" ? s : c.value);
+  });
+  const uid = "wg-" + b.id, pos = (c, x) => c.log ? Math.log10(x) : x, fromPos = (c, p) => c.log ? +Math.pow(10, +p).toPrecision(6) : +p;
+  const help = c => c.help ? "<small>" + esc(c.help) + "</small>" : "";
+  const ctlHTML = c => {
+    const id = uid + "-" + c.id, lab = esc(c.label || c.id);
+    if (c.type === "range") {
+      const lo = pos(c, c.min), hi = pos(c, c.max), st = c.step != null && !c.log ? c.step : (hi - lo) / 200;
+      return '<div class="wg-ctl"><label for="' + id + '"><span>' + lab + '</span><output id="' + id + '-o">' + esc(ctlText(c, v[c.id])) + "</output></label>" +
+        '<input type="range" id="' + id + '" data-c="' + esc(c.id) + '" min="' + lo + '" max="' + hi + '" step="' + st + '" value="' + pos(c, v[c.id]) + '">' + help(c) + "</div>";
+    }
+    if (c.type === "select") return '<div class="wg-ctl"><label for="' + id + '"><span>' + lab + '</span></label><select id="' + id + '" data-c="' + esc(c.id) + '">' +
+      c.options.map(o => '<option value="' + esc(o.v) + '"' + (o.v === v[c.id] ? " selected" : "") + ">" + esc(o.l == null ? o.v : o.l) + "</option>").join("") + "</select>" + help(c) + "</div>";
+    return '<div class="wg-ctl"><label class="chk" for="' + id + '"><input type="checkbox" id="' + id + '" data-c="' + esc(c.id) + '"' + (v[c.id] ? " checked" : "") + "> " + lab + "</label>" + help(c) + "</div>";
+  };
+  host.insertAdjacentHTML("beforeend", '<div class="wg" id="' + uid + '"><div class="wg-side">' + b.controls.map(ctlHTML).join("") +
+    '<div class="wg-acts"><button class="btn" type="button" data-a="reset">기본값</button><button class="btn" type="button" data-a="md" title="현재 조건과 결과를 Markdown 으로 복사">조건 복사</button>' +
+    (b.table ? '<button class="btn pri" type="button" data-a="take" hidden>조건에 맞는 행 담기</button>' : "") + "</div></div>" +
+    '<div class="wg-main"><div class="wg-cards"></div><div class="wg-plots"></div><div class="wg-custom"></div><div class="wg-note prose"></div><div class="wg-err" role="alert" hidden></div></div></div>');
+  const el = host.lastElementChild;
+  const W = {b, v, defs, el, state: {}, pmap: {}, result: null, summary: "", drawn: false, dirty: false,
+    cards: $(".wg-cards", el), pbox: $(".wg-plots", el), custom: $(".wg-custom", el), note: $(".wg-note", el), err: $(".wg-err", el)};
+  el.addEventListener("input", e => {
+    const c = b.controls.find(x => x.id === e.target.dataset.c); if (!c) return;
+    v[c.id] = c.type === "range" ? fromPos(c, e.target.value) : c.type === "toggle" ? e.target.checked : (c.options.find(o => String(o.v) === e.target.value) || {}).v;
+    const o = $("#" + uid + "-" + c.id + "-o"); if (o) o.textContent = ctlText(c, v[c.id]);
+    store.set(SK, v); requestDraw(W);
+  });
+  el.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-a]"); if (!btn) return;
+    if (btn.dataset.a === "reset") {
+      b.controls.forEach(c => { v[c.id] = defs[c.id]; const inp = $("#" + uid + "-" + c.id);
+        if (c.type === "range") { inp.value = pos(c, v[c.id]); $("#" + uid + "-" + c.id + "-o").textContent = ctlText(c, v[c.id]); }
+        else if (c.type === "toggle") inp.checked = !!v[c.id]; else inp.value = String(v[c.id]); });
+      store.set(SK, v); requestDraw(W);
+    } else if (btn.dataset.a === "md") copyText(widgetMd(W), btn);
+    else if (btn.dataset.a === "take" && W.result) { setBasket(b.table, W.result, true); toast(W.result.length.toLocaleString() + "행을 바구니에 담았습니다"); }
+  });
+  WIDGETS.push(W);
+}
+function requestDraw(W) { cancelAnimationFrame(W.raf); W.raf = requestAnimationFrame(() => { if (isShown(W.el)) drawWidget(W); else W.dirty = true; }); }
+function plotLayout(layout) {
+  const L = themeLayout({}), ax = {gridcolor: cssv("--line"), zerolinecolor: cssv("--edge"), linecolor: cssv("--edge"), automargin: true};
+  L.margin = {l: 56, r: 16, t: 16, b: 46};
+  Object.keys(layout || {}).forEach(k => { L[k] = /^[xy]axis\d*$/.test(k) ? Object.assign({}, ax, layout[k]) : layout[k]; });
+  return L;
+}
+function drawWidget(W) {
+  const b = W.b, fn = WFN[b.id], used = new Set();
+  W.result = null; W.summary = "";
+  const ctx = {
+    v: Object.assign({}, W.v), first: !W.drawn, state: W.state, el: W.custom,
+    rows: b.table ? R.tables[b.table].rows : [], table: id => (R.tables[id] || {rows: []}).rows,
+    color: n => cssv(String(n).startsWith("--") ? n : "--" + n),
+    fmt: (x, o) => fmtNum(x, o || {}),
+    cards: items => { W.cards.innerHTML = '<div class="cards">' + items.map(c => '<div class="card' + (c.tone ? " t-" + esc(c.tone) : "") + '"><b>' + esc(c.value) + "</b><span>" + esc(c.label) + "</span>" + (c.note ? "<small>" + esc(c.note) + "</small>" : "") + "</div>").join("") + "</div>"; },
+    note: html => { W.note.innerHTML = html; },
+    plot: (key, traces, layout) => {
+      used.add(key);
+      let d = W.pmap[key]; if (!d) { d = W.pmap[key] = document.createElement("div"); d.className = "wg-plot"; W.pbox.appendChild(d); }
+      d.style.height = ((layout && layout.height) || 340) + "px";
+      if (!window.Plotly) { d.innerHTML = '<div class="nolib">그래프 라이브러리(plotly)를 불러오지 못했습니다. 인터넷 연결을 확인하세요.</div>'; return; }
+      Plotly.react(d, traces, plotLayout(layout), {displaylogo: false, responsive: true, modeBarButtonsToRemove: ["sendDataToCloud", "toImage"]});
+    },
+    result: idxs => { W.result = Array.from(idxs); },
+    summary: s => { W.summary = String(s); }
+  };
+  W.err.hidden = true;
+  try { if (!fn) throw new Error("이 위젯의 스크립트가 없습니다 (" + b.id + ")"); fn(ctx); }
+  catch (e) { W.err.hidden = false; W.err.textContent = "위젯 오류: " + (e && e.message ? e.message : e); console.error(e); }
+  Object.keys(W.pmap).forEach(k => { if (!used.has(k)) { if (window.Plotly) Plotly.purge(W.pmap[k]); W.pmap[k].remove(); delete W.pmap[k]; } });
+  const take = $('[data-a="take"]', W.el);
+  if (take) { take.hidden = !W.result; if (W.result) take.textContent = "조건에 맞는 " + W.result.length.toLocaleString() + "행 담기"; }
+  W.drawn = true; W.dirty = false;
+}
+function widgetMd(W) {
+  const L = ["### " + (W.b.title || W.b.id)];
+  W.b.controls.forEach(c => L.push("- **" + (c.label || c.id) + "**: " + ctlText(c, W.v[c.id])));
+  if (W.summary) L.push("- 결과: " + W.summary);
+  return L.join("\n");
+}
 
 /* ---------- review form -> markdown ---------- */
 function makeReview(host, b) {
@@ -572,6 +691,7 @@ function makeReview(host, b) {
   wrap.innerHTML = b.items.map(it => '<div class="rv-item"><h4>' + esc(it.title || it.id) + "</h4>" + (it.desc ? '<div class="desc">' + it.desc + "</div>" : "") + (it.fields || []).map(f => fieldHTML(it, f)).join("") + "</div>").join("") +
     '<div class="rv-out"><div class="rv-actions"><button class="btn pri" type="button" data-a="gen">Markdown 생성</button><button class="btn" type="button" data-a="copy">복사</button><button class="btn" type="button" data-a="save">.md 저장</button>' +
     '<label><input type="checkbox" data-o="basket"' + (b.include_basket === false ? "" : " checked") + "> 선택 바구니 포함</label>" +
+    (R.has_widgets ? '<label><input type="checkbox" data-o="widgets" checked> 탐색 위젯 조건 포함</label>' : "") +
     '<label><input type="checkbox" data-o="answered"> 답한 항목만</label><button class="btn" type="button" data-a="reset">선택 초기화</button><span class="rv-status"></span></div>' +
     '<textarea readonly aria-label="생성된 Markdown" placeholder="‘Markdown 생성’을 누르면 여기에 결과가 나옵니다. 다음 단계 요청에 그대로 붙여 넣으세요."></textarea></div>';
   const status = $(".rv-status", wrap), out = $(".rv-out textarea", wrap);
@@ -602,6 +722,8 @@ function makeReview(host, b) {
       });
       if (lines.length || !onlyAns) { L.push("", "## " + (it.title || it.id)); if (it.md_desc) L.push("", it.md_desc); L.push(""); L.push.apply(L, lines.length ? lines : ["- (응답 없음)"]); }
     });
+    const wo = $('input[data-o="widgets"]', wrap);
+    if (wo && wo.checked && WIDGETS.length) { L.push("", "## 탐색 조건"); WIDGETS.forEach(W => L.push("", widgetMd(W))); }
     if (withB && BASKET.size) {
       L.push("", "## 관심 항목 (선택 바구니 " + BASKET.size + "행)");
       basketGroups().forEach((idxs, tid) => {
@@ -639,6 +761,7 @@ const RENDER = {
   table: (b, el) => makeTable(el, b),
   chart: (b, el) => makeChart(el, b),
   review: (b, el) => makeReview(el, b),
+  widget: (b, el) => makeWidget(el, b),
   details: (b, el) => {
     const d = document.createElement("details"); d.className = "dt"; if (b.open) d.open = true;
     const s = document.createElement("summary"); s.textContent = b.summary || b.title || "자세히"; d.appendChild(s);
@@ -672,6 +795,7 @@ function init() {
     const sec = document.createElement("section"); sec.className = "tab"; sec.dataset.id = t.id; sec.id = "sec-" + t.id; sec.hidden = true; sec.setAttribute("aria-label", t.title); main.appendChild(sec);
   });
   initBasket();
+  if (!Object.keys(R.tables).length) $("#ir-basket").hidden = true;   // nothing to select in a table-less report
   R.tabs.forEach(t => renderBlocks(t.blocks, $("#sec-" + t.id)));
   renderBasket();
   const h = decodeURIComponent((location.hash || "").slice(1));

@@ -1,4 +1,4 @@
-# spec 스키마 (build_report.py v0.1)
+# spec 스키마 (build_report.py v0.2)
 
 spec 은 JSON(또는 YAML) 객체 하나다. 상대경로는 spec 파일 위치 기준.
 
@@ -120,6 +120,57 @@ tone: `note`(기본) `warn` `good` `tip`.
 원시 plotly: `{"type":"chart","data":[...],"layout":{...}}` — 표와 연동되지 않는다.
 점·값 막대 클릭 = 바구니 토글, 올가미/상자 선택 = 바구니에 추가.
 
+### widget
+조건(controls)을 바꾸면 `script` 를 다시 실행해 카드·그래프를 새로 그린다.
+
+```json
+{"type":"widget","id":"power","title":"검증 표본 수","table":"deg","script_file":"widgets/power.js",
+ "controls":[
+  {"id":"d","label":"효과 크기 d","type":"range","min":0.2,"max":3,"step":0.05,"value":1,"dp":2,"help":"평균 차 / SD"},
+  {"id":"padj","label":"padj <","type":"range","min":1e-6,"max":0.1,"value":0.05,"log":true},
+  {"id":"n","label":"군당 표본 수","type":"range","min":2,"max":50,"step":1,"value":6,"unit":"명"},
+  {"id":"alpha","label":"α","type":"select","options":[0.05,0.01],"value":0.05},
+  {"id":"show","label":"보조선 표시","type":"toggle","value":true}]}
+```
+
+| 키 | 설명 |
+|---|---|
+| `id` | 보고서 안에서 고유. 브라우저 저장 키 (`#` 링크는 아님) |
+| `controls[].type` | `range` (기본) · `select` · `toggle` |
+| range | `min` < `max` (필수), `value` (기본 min), `step` (기본: 범위/200), `log` (로그 눈금, min > 0), `dp`·`fmt`·`unit` (값 표시) |
+| select | `options`: 값 목록 또는 `{v, l}`. `value` 기본은 첫 값. 값은 숫자·문자 그대로 ctx.v 에 들어감 |
+| toggle | `value` true/false |
+| `help` | 컨트롤 아래 작은 설명 |
+| `script` / `script_file` | render(ctx) 함수의 **본문** (JS). 둘 중 하나 필수. `script` 는 문자열 또는 줄 목록 |
+| `table` | `tables` 의 id. `ctx.rows` 로 받고, `ctx.result()` 로 바구니 버튼을 켤 수 있다 |
+
+ctx 는 조건이 바뀔 때마다 새로 만들어진다 (requestAnimationFrame 으로 프레임당 1회):
+
+| ctx | |
+|---|---|
+| `v` | `{control id: 현재 값}` (range 는 숫자, toggle 은 bool) |
+| `rows` · `table(id)` | 행 배열 (spec 의 원본 값, 결측은 `null`) |
+| `cards(items)` | `[{value,label,note,tone}]` 카드 줄 (tone: up/down/good/warn/acc/mut) |
+| `plot(key, traces, layout)` | key 마다 그래프 하나. 이번 실행에서 부르지 않은 key 의 그래프는 지워진다. `layout` 은 테마 위에 병합, `height` 기본 340 |
+| `note(html)` | 위젯 아래 설명 (HTML 그대로) |
+| `el` | 직접 DOM/SVG 를 그릴 빈 영역 |
+| `result(idxs)` | 표 행 index 배열 → "조건에 맞는 N행 담기" 버튼 |
+| `summary(text)` | 결과 한 줄 → "조건 복사" 와 review Markdown `## 탐색 조건` |
+| `color(name)` | 테마 토큰 값: `up` `dn` `ns` `acc` `mut` `ink` `line` `c1`–`c8` 등 |
+| `fmt(x, {fmt,dp})` | 표와 같은 숫자 표기 |
+| `state` · `first` | 실행 사이에 유지되는 객체 (캐시) · 첫 실행이면 true |
+
+최소 스크립트:
+```js
+const k = ctx.v.fc, n = ctx.rows.filter(r => Math.abs(r.log2FC) >= k).length;
+ctx.cards([{value: n, label: `|log2FC| ≥ ${k}`}]);
+ctx.plot("hist", [{type: "histogram", x: ctx.rows.map(r => r.log2FC), marker: {color: ctx.color("acc")}}],
+         {height: 260, shapes: [{type: "line", x0: k, x1: k, yref: "paper", y0: 0, y1: 1}]});
+ctx.summary(`${n}개`);
+```
+스크립트는 인라인 `<script>` 함수로 들어가므로 eval 을 쓰지 않는다 (Artifact CSP 와 무관). 빌드 시 node 가 있으면 문법을 검사한다.
+실행 오류는 위젯 안에 "위젯 오류: …" 로 표시된다.
+
 ### figure
 ```json
 {"type":"figure","src":"fig/volcano.png","caption":"...","alt":"..."}
@@ -175,4 +226,4 @@ details 안의 그래프는 펼칠 때 그린다.
 - 기본: `<!doctype html>` 완결 파일. 브라우저에서 바로 연다. TSV·MD 저장은 브라우저 다운로드.
 - `--artifact`: doctype/head/body 없는 본문 (Artifact 도구가 감싼다). 게시할 때 `capabilities: {"downloads": true}`.
   Artifact 저장 허용 확장자에 `.tsv` 가 없어서 TSV 는 `.txt` (탭 구분) 로 저장된다.
-- 16 MB 를 넘으면 경고. Plotly 는 cdnjs 2.35.3 을 그래프가 있을 때만 불러온다.
+- 16 MB 를 넘으면 경고. Plotly 는 cdnjs 2.35.3 을 chart·widget 이 있을 때만 불러온다.

@@ -49,8 +49,21 @@ bad_chart = json.loads(json.dumps(spec))
 bad_chart["tabs"][0]["blocks"].append({"type": "chart", "table": "table1", "kind": "scatter", "x": "dir", "y": "lfc"})
 raises(lambda: br.build(bad_chart), "숫자(num) 열")
 
+# parameter widgets: validation, script embedding, build-time syntax check
+wspec = lambda w: {"meta": {"title": "t"}, "tabs": [{"title": "요약", "blocks": [w]}]}
+ctl = [{"id": "k", "type": "range", "min": 0, "max": 1, "value": 0.5}]
+raises(lambda: br.build(wspec({"type": "widget", "id": "w", "controls": ctl})), "script")
+raises(lambda: br.build(wspec({"type": "widget", "id": "w", "controls": [{"id": "k", "type": "range", "min": 1, "max": 1}], "script": "1"})), "min < max")
+raises(lambda: br.build(wspec({"type": "widget", "id": "w", "controls": [{"id": "k", "type": "range", "min": 0, "max": 1, "log": True}], "script": "1"})), "min > 0")
+page = br.build(wspec({"type": "widget", "id": "w", "controls": ctl + [{"id": "s", "type": "select", "options": [1, 2]}], "script": "ctx.cards([{value: ctx.v.k, label: '</script>'}]);"}))
+d = data_of(page)
+assert d["has_widgets"] and d["tabs"][0]["blocks"][0]["controls"][1]["value"] == 1 and "plotly" in page
+assert 'window.IR_WIDGETS["w"]=function(ctx){' in page and "<\\/script>" in page, "closing tag inside widget code is escaped"
+if br.shutil.which("node"):
+    raises(lambda: br.build(wspec({"type": "widget", "id": "w", "controls": ctl, "script": "const = ;"})), "문법 오류")
+
 # both examples build; artifact mode has no document wrapper; plotly only when charts exist
-for ex in ("analysis", "literature"):
+for ex in ("analysis", "literature", "explainer"):
     sp = SKILL / "examples" / ex / "spec.json"
     page = br.build(br.load_spec(sp), sp.parent, sp.name)
     assert page.startswith("<!doctype html>") and "plotly" in page and not br.WARN, (ex, br.WARN)

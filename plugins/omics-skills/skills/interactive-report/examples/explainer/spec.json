@@ -1,0 +1,25 @@
+{
+ "meta": {"id": "example-explainer", "title": "예시 · GBDT 원리 위젯", "subtitle": "방법 원리 설명 용도 — 조건을 바꾸면 계산과 그림이 바로 바뀐다", "author": "interactive-report 예시"},
+ "tabs": [
+  {"id": "summary", "title": "요약", "role": "summary", "blocks": [
+   "## 무엇을 보여 주나\n\nGradient boosting(GBDT)은 **앞 모델이 틀린 만큼(잔차)을 다음 트리가 배우는** 과정을 M 번 반복한다. **GBDT 원리** 탭의 위젯에서 트리 수·학습률·깊이를 바꾸면 1차원 합성 데이터에 대한 적합 결과를 그 자리에서 다시 계산해 보여 준다.\n\n1. **초기값**: F₀(x) = 평균(y)\n2. **잔차 계산**: rᵢ = yᵢ − F_{m−1}(xᵢ) (제곱오차 손실의 음의 기울기)\n3. **잔차에 트리 적합**: 얕은 트리 h_m 이 x 로 잔차를 예측하도록 학습\n4. **축소해서 더하기**: F_m = F_{m−1} + η·h_m\n5. 2–4 를 M 번 반복",
+   {"type": "callout", "tone": "tip", "title": "해 볼 것", "text": "- **M 을 늘리면** 잔차가 0 근처로 모이고, 적합 곡선이 x = 6.5 의 계단까지 따라간다.\n- **깊이 3 에서 η 를 1 로 올리면** 트리 2–3개로 학습 데이터를 거의 다 맞추지만(학습 MSE → 0) 잡음까지 따라가 검증 MSE 가 다시 오른다.\n- **깊이 1(stump)** 은 약한 학습기라 η = 1 이어도 과적합이 느리다. 한 단계에 계단 하나 vs 여러 개를 비교해 보자.\n- **η 를 0.1 로 낮추면** 트리가 많이 필요하지만 검증 MSE 최저점이 조금 더 낮다."}
+  ]},
+  {"id": "gbdt", "title": "GBDT 원리", "blocks": [
+   {"type": "widget", "id": "gbdt", "title": "Gradient boosting 한 단계씩", "script_file": "widgets/gbdt.js",
+    "intro": "위: 학습 데이터와 현재 앙상블 F_M(x). 가운데: M 번째 트리가 배운 잔차와 그 트리 h_M(x). 아래: 트리 수에 따른 학습·검증 MSE.",
+    "controls": [
+     {"id": "M", "label": "트리 수 M", "type": "range", "min": 1, "max": 100, "step": 1, "value": 10},
+     {"id": "eta", "label": "학습률 η", "type": "range", "min": 0.05, "max": 1, "step": 0.05, "value": 0.3, "dp": 2},
+     {"id": "depth", "label": "트리 깊이", "type": "select", "options": [{"v": 1, "l": "1 (stump)"}, {"v": 2, "l": "2"}, {"v": 3, "l": "3"}], "value": 1, "help": "변수가 여럿이면 깊이 = 상호작용 차수"}
+    ]},
+   "### 왜 \"gradient\" boosting 인가\n\n제곱오차 L = ½(y − F)² 의 F 에 대한 음의 기울기는 y − F, 즉 잔차다. 잔차에 트리를 맞추는 것은 **함수 공간에서의 경사하강**이고, 손실만 바꾸면 분류(log-loss → y − p)·순위·생존분석에 같은 틀을 쓴다."
+  ]}
+ ],
+ "environment": {
+  "parameters": {"데이터": "1차원 합성, 학습 80 · 검증 300 점, 시드 고정", "참 함수": "sin(0.9x) + 1.6·[x > 6.5], 잡음 SD 0.35", "손실": "제곱오차", "트리": "회귀나무, 노드 최소 2점"},
+  "reproduce": "python3 scripts/build_report.py examples/explainer/spec.json",
+  "notes": "- 위젯 계산은 브라우저에서 한다 (트리 100개, 1차원). η·깊이를 바꿀 때만 다시 학습하고 M 은 앞에서부터 잘라 쓴다.\n- XGBoost·LightGBM 은 2차 도함수·정규화·히스토그램 분할을 더하지만 원리는 같다."
+ },
+ "glossary": [["잔차 (residual)", "y − F(x): 지금 모델이 아직 설명하지 못한 부분"], ["학습률 η", "새 트리를 얼마나 반영할지 (shrinkage)"], ["early stopping", "검증 손실이 더 줄지 않으면 트리 추가를 멈춤"]]
+}

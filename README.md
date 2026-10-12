@@ -5,7 +5,7 @@ ysjo 의 오믹스 분석 모듈을 Claude Code 스킬로 묶은 개인 저장�
 
 | 스킬 | 호출 | 하는 일 |
 |---|---|---|
-| [interactive-report](plugins/omics-skills/skills/interactive-report/SKILL.md) | `/omics-skills:interactive-report` 또는 "인터랙티브 보고서 만들어줘" | 분석 결과·문헌을 탭·필터 표·선택 바구니(TSV)·검토(Markdown)·연동 그래프가 있는 단일 HTML 로 |
+| [interactive-report](plugins/omics-skills/skills/interactive-report/SKILL.md) | `/omics-skills:interactive-report` 또는 "인터랙티브 보고서 만들어줘" | 분석 결과·문헌을 탭·필터 표·선택 바구니(TSV)·검토(Markdown)·연동 그래프·**파라미터 위젯**(슬라이더 → 재계산·재시각화)이 있는 단일 HTML 로 |
 
 ## 설치
 
