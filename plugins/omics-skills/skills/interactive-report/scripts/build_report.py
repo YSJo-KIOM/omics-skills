@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tempfile
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 HERE = pathlib.Path(__file__).resolve().parent
 TEMPLATE = HERE.parent / "assets" / "report.html"
 PLOTLY = '<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>'

@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
 /* Layout: sticky header (title + tab nav) over one visible tab; JSON-driven blocks; fixed selection basket bottom-right.
+   Text uses the full content width like tables and figures (user preference over the 65ch line-length rule).
    Tokens follow the EK-7 / COPD Atlas / TGFB2 report family. */
 :root{
   --bg:#f7f7f5;--card:#ffffff;--ink:#1d1f1e;--mut:#646a67;--line:#e2e3df;--edge:#c8cbc6;--soft:#f0f2ef;--soft2:#fafaf8;
@@ -46,13 +47,12 @@ nav#ir-nav{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 nav#ir-nav button{border:1px solid var(--edge);background:var(--soft);color:var(--ink);padding:5px 13px;border-radius:14px;cursor:pointer;font:inherit;font-size:12.5px}
 nav#ir-nav button[aria-current="page"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
 main{max-width:1500px;margin:0 auto;padding-inline:24px;padding-block:14px 140px}
-.prose p,.prose li,.prose blockquote{max-width:72ch}
 .prose blockquote{margin:8px 0;padding:4px 12px;border-left:3px solid var(--edge);color:var(--mut)}
 .prose table{border-collapse:collapse;font-size:12.5px;margin:8px 0;display:block;overflow-x:auto;max-width:100%}
 .prose th,.prose td{border-bottom:1px solid var(--line);padding:4px 10px;text-align:left;vertical-align:top}
 .prose th{background:var(--soft)}
 .blk{min-width:0}
-.blk>.intro{color:var(--mut);font-size:13px;margin:-2px 0 8px;max-width:90ch}
+.blk>.intro{color:var(--mut);font-size:13px;margin:-2px 0 8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:11px 14px;min-width:0}
 .card b{display:block;font-size:24px;font-weight:500;font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--acc);overflow-wrap:anywhere}
@@ -65,7 +65,7 @@ main{max-width:1500px;margin:0 auto;padding-inline:24px;padding-block:14px 140px
 .callout.t-warn{border-color:var(--warn);background:var(--warnbg)}
 .callout.t-good{border-color:var(--good);background:var(--goodbg)}
 .callout.t-tip{border-color:var(--tip);background:var(--tipbg)}
-table.kv{border-collapse:collapse;font-size:13px;width:100%;max-width:1100px}
+table.kv{border-collapse:collapse;font-size:13px;width:100%}
 table.kv th,table.kv td{border-bottom:1px solid var(--line);padding:5px 10px;text-align:left;vertical-align:top}
 table.kv th{width:28%;min-width:120px;color:var(--mut);font-weight:500}
 table.kv td{overflow-wrap:anywhere}

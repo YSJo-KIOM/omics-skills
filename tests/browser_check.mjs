@@ -23,6 +23,11 @@ const fire=(el,t)=>el.dispatchEvent(new Event(t,{bubbles:true}));const cnt=el=>e
 const checks = [];
 const ok = (name, cond, info) => { checks.push([cond ? "PASS" : "FAIL", name, info]); };
 if (which === "analysis") {
+  let w0 = await ev(H + `$$('#ir-nav button').find(b=>b.textContent==='요약').click();await w(200);const blk=$('#sec-summary .blk.prose');
+    const W=$('main').clientWidth-48,r={blk:blk.clientWidth,li:blk.querySelector('li').getBoundingClientRect().width,callout:$('#sec-summary .callout li').getBoundingClientRect().width,W};
+    $$('#ir-nav button').find(b=>b.textContent==='분석 환경·기타').click();await w(200);r.kv=$('#sec-env table.kv').getBoundingClientRect().width;
+    $$('#ir-nav button').find(b=>b.textContent==='차등발현').click();await w(300);return r;`);
+  ok("text uses full width (prose, callout, kv) like tables", w0.li >= 0.9 * w0.blk && w0.callout >= 0.85 * w0.W && w0.kv >= 0.98 * w0.W, JSON.stringify(w0));
   let r = await ev(H + `const sec=$('#sec-deg'),pad=sec.querySelectorAll('.cf')[2];pad.value='<0.01';fire(pad,'input');await w(400);
     const c1=cnt(pad);const dir=sec.querySelector('.cs');dir.value='up';fire(dir,'change');await w(400);
     const pills=[...sec.querySelectorAll('tbody tr td:nth-child(6) .pill')].map(p=>p.textContent);

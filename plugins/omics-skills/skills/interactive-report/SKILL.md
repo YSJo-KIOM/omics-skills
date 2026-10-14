@@ -49,6 +49,7 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/build_report.py" report/spec.json --artifac
 - **중간 탭 = 질문 하나에 탭 하나** (차등발현 / 기능 분석 / 네트워크 / 문헌 근거 …). 탭 안 순서는
   한두 문장 설명 → 그래프 → 표 → 해석·주의. 블록이 8개를 넘으면 `details` 로 접거나 탭을 나눈다.
 - **다음 단계 탭** (권장): `review` 블록으로 사용자가 고를 방향을 항목화한다.
+- 본문 글도 표·그림처럼 **전체 폭**을 쓴다 (사용자 선호). 줄 길이를 좁히는 `max-width` CSS 를 html 블록으로 넣지 않는다.
 - **마지막 탭 = 분석 환경·기타**: spec 의 `environment` (software · parameters · data · reproduce · notes) 와 `glossary` 로
   빌더가 자동으로 만든다. 마지막 탭 role 이 `environment` 이면 그 탭 뒤에 붙인다. 빌더가 생성 시각·도구 버전도 넣는다.
 

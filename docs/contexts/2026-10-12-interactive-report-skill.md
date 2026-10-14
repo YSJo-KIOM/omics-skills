@@ -46,3 +46,6 @@ COPD–근감소 Biomarker Atlas, EPICv2 명세 작성기 (아티팩트). 요구
 - 사용자: zip 업로드, 시연 보고서에서 TSV 저장·Markdown 저장 동작 확인 (Artifact downloads 는 세션에서 시험 불가).
 - 다음 스킬화 대상 지시 대기. 인벤토리 high 후보: RNA-seq 모듈형 파이프라인, nf-core 입력 준비, PCSF, Chemical–disease, TGFB2 탐색.
 - 보안 점검 항목의 키 폐기·정리 여부 사용자 결정 대기 (로컬 inventory 참조).
+
+## 2026-10-14: 본문 전체 폭 (v0.3.1, [[decisions/0007]])
+- 템플릿의 72ch·90ch·1100px 제한 제거. 브라우저 검사에 폭 확인 1항목 추가 (전체 45 PASS).
