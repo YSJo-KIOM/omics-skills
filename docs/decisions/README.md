@@ -21,3 +21,4 @@
 | [0005](0005-parameter-widgets.md) | 파라미터 위젯 (조건 변경 → 재계산 → 시각화) | 2026-10-12 | 채택 |
 | [0006](0006-local-full-artifact-reduced.md) | 로컬 전체판 + Artifact 축소판 | 2026-10-12 | 채택 |
 | [0007](0007-text-full-width.md) | 보고서 본문 글은 전체 폭 | 2026-10-14 | 채택 |
+| [0009](0009-root-distribution-zip.md) | 배포용 zip 을 저장소 루트에 커밋한다 | 2026-11-17 | 채택 |

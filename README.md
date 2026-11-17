@@ -24,10 +24,12 @@ claude plugin marketplace update omics-skills && claude plugin update omics-skil
 cloud 세션은 개인 플러그인과 `~/.claude/skills` 를 불러오지 않는다. 두 가지 중 하나:
 
 1. **claude.ai 계정에 스킬 업로드** (권장) — cloud 세션과 로컬 터미널(`~/.claude/skills/synced/`) 양쪽에 동기화된다.
-   ```bash
-   mkdir -p dist && (cd plugins/omics-skills/skills && zip -r ../../../dist/interactive-report.zip interactive-report -x '*/__pycache__/*')
-   ```
+   배포용 zip 은 저장소 루트의 [interactive-report.zip](interactive-report.zip) 이다 (GitHub 에서 바로 받는다).
    claude.ai → 설정 → Capabilities(기능) → Skills 에서 zip 업로드 후 켜기.
+   스킬을 고쳤으면 zip 을 다시 만들어 함께 커밋한다 (낡으면 `tests/test_build_report.py` 가 걸린다):
+   ```bash
+   rm -f interactive-report.zip && (cd plugins/omics-skills/skills && zip -rX ../../../interactive-report.zip interactive-report -x '*/__pycache__/*')
+   ```
    업로드 시 frontmatter 는 `name`, `description` (그 밖에 license, compatibility, metadata, allowed-tools) 만 허용된다.
 2. 작업할 프로젝트 저장소의 `.claude/skills/` 에 스킬 폴더를 복사해 커밋.
 

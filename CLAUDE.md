@@ -13,4 +13,5 @@
 - 스킬 번들 안에는 사용 시 필요한 것만 (SKILL.md, scripts, assets, references, examples). 개발용 검사는 `tests/`.
 - 스크립트는 가능한 한 표준 라이브러리만. 외부 도구가 필요하면 SKILL.md 에 사전조건과 설치 명령을 적는다.
 - 변경 후 `python3 tests/test_build_report.py` 와 `claude plugin validate .` 를 돌린다. 런타임(assets/report.html)을 바꿨으면 `tests/browser_check.mjs` 도.
+- interactive-report 스킬 폴더를 고쳤으면 루트의 배포용 `interactive-report.zip` 을 다시 만들어 같은 커밋에 넣는다 (명령은 README, [[decisions/0009]]).
 - 런타임은 10만 행 이상 표에서도 동작해야 한다: 행 배열에 spread·`apply` 금지 (call stack 초과). 큰 데이터 확인은 15만 행 합성 표로.

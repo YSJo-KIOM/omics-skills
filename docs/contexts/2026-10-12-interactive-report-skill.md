@@ -49,3 +49,6 @@ COPD–근감소 Biomarker Atlas, EPICv2 명세 작성기 (아티팩트). 요구
 
 ## 2026-10-14: 본문 전체 폭 (v0.3.1, [[decisions/0007]])
 - 템플릿의 72ch·90ch·1100px 제한 제거. 브라우저 검사에 폭 확인 1항목 추가 (전체 45 PASS).
+
+## 2026-11-17: 배포용 zip 을 루트에 커밋 ([[decisions/0009]])
+- `interactive-report.zip` (루트) 을 추적한다. 스킬 내용은 v0.3.1 그대로다. zip 이 낡으면 `tests/test_build_report.py` 가 걸린다.

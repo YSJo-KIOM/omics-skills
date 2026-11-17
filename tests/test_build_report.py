@@ -4,6 +4,7 @@ import pathlib
 import re
 import sys
 import tempfile
+import zipfile
 
 SKILL = pathlib.Path(__file__).resolve().parents[1] / "plugins/omics-skills/skills/interactive-report"
 sys.path.insert(0, str(SKILL / "scripts"))
@@ -106,4 +107,11 @@ assert not any(b["type"] == "chart" for t in d["tabs"] for b in t["blocks"])
 with tempfile.TemporaryDirectory() as tmp:
     out = pathlib.Path(tmp) / "r.html"
     assert br.main([str(SKILL / "examples/analysis/spec.json"), "-o", str(out)]) == 0 and out.stat().st_size > 50_000
+
+# 루트의 배포용 zip 이 스킬 폴더와 같은가 (스킬을 고치고 zip 을 다시 만들지 않으면 여기서 걸린다)
+with zipfile.ZipFile(SKILL.parents[3] / "interactive-report.zip") as z:
+    packed = {n: z.read(n) for n in z.namelist() if not n.endswith("/")}
+files = {f"interactive-report/{p.relative_to(SKILL).as_posix()}": p.read_bytes()
+         for p in SKILL.rglob("*") if p.is_file() and "__pycache__" not in p.parts}
+assert packed == files, f"interactive-report.zip 이 낡았다 (README 의 zip 명령으로 다시 만든다): {sorted(set(packed) ^ set(files))}"
 print("ok")
